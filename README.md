@@ -1,5 +1,7 @@
 # Ember.Model [![Build Status](https://travis-ci.org/ebryn/ember-model.png?branch=master)](https://travis-ci.org/ebryn/ember-model)
 
+[ ![Codeship Status for CondeNast/copilot](https://app.codeship.com/projects/921f5320-7ff6-0132-9038-321707412590/status?branch=master)](https://app.codeship.com/projects/57409)
+
 ## Introduction
 
 Ember Model (EM) is a simple and lightweight model library for Ember. It intentionally supports a limited feature set. The main goal is to provide primitives on top of $.ajax that are required by Ember.
