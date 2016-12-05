@@ -40,14 +40,16 @@ Ember.hasMany = function(type, options) {
 
 Ember.Model.reopen({
   getHasMany: function(key, type, meta, owner) {
-    var embedded = meta.options.embedded,
-        collectionClass = embedded ? Ember.EmbeddedHasManyArray : Ember.HasManyArray;
+    var embedded = meta.options.embedded;
+    var polymorphic = meta.options.polymorphic;
+    var collectionClass = embedded ? Ember.EmbeddedHasManyArray : Ember.HasManyArray;
 
     var collection = collectionClass.create({
       parent: this,
       modelClass: type,
       content: this._getHasManyContent(key, type, embedded),
       embedded: embedded,
+      polymorphic: polymorphic,
       key: key,
       relationshipKey: meta.relationshipKey
     });

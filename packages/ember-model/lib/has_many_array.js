@@ -188,17 +188,27 @@ Ember.ManyArray = Ember.RecordArray.extend({
 
 Ember.HasManyArray = Ember.ManyArray.extend({
   materializeRecord: function(idx, owner) {
-    var klass = get(this, 'modelClass'),
-        content = get(this, 'content'),
-        reference = content.objectAt(idx),
-        record = reference.record;
+    var klass = get(this, 'modelClass');
+    var content = get(this, 'content');
+    var reference = content.objectAt(idx);
+    var record = reference.record;
+    var isPolymorphic = get(this, 'polymorphic');
+    var type;
+    var store;
 
     if (record) {
-      if (! Ember.getOwner(record)) {
+      if (!Ember.getOwner(record)) {
         Ember.setOwner(record, owner);
       }
       return record;
     }
+
+    if (isPolymorphic) {
+      type = klass.polymorphicType(reference.data);
+      store = owner.lookup('service:store');
+      klass = store.modelFor(type);
+    }
+
     return klass._findFetchById(reference.id, false, owner);
   },
 
@@ -226,21 +236,30 @@ Ember.EmbeddedHasManyArray = Ember.ManyArray.extend({
   },
 
   materializeRecord: function(idx, owner) {
-    var klass = get(this, 'modelClass'),
-        primaryKey = get(klass, 'primaryKey'),
-        content = get(this, 'content'),
-        reference = content.objectAt(idx),
-        attrs = reference.data;
+    var content = get(this, 'content');
+    var reference = content.objectAt(idx);
+    var attrs = reference.data;
+    var isPolymorphic = get(this, 'polymorphic');
+    var klass = get(this, 'modelClass');
+    var primaryKey;
+    var type;
+    var store;
 
     var record;
     if (reference.record) {
       record = reference.record;
       Ember.setOwner(record, owner);
     } else {
+      if (isPolymorphic) {
+        store = owner.lookup('service:store');
+        type = klass.polymorphicType(attrs);
+        klass = store.modelFor(type);
+      }
       record = klass.create({ _reference: reference });
       reference.record = record;
       Ember.setOwner(record, owner);
       if (attrs) {
+        primaryKey = get(klass, 'primaryKey');
         record.load(attrs[primaryKey], attrs);
       }
     }
