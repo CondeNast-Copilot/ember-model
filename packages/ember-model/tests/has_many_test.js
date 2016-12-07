@@ -118,7 +118,7 @@ test("model can be specified with a string to a resolved path", function() {
   owner.register('model:article', App.Article);
   owner.register('model:comment', App.Comment);
   owner.register('model:subcomment', App.Subcomment);
-  owner.register('store:main', Ember.Model.Store);
+  owner.register('service:store', Ember.Model.Store);
   var article = App.Article.create();
 
   Ember.setOwner(article, owner);

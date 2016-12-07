@@ -81,7 +81,7 @@ test("model can be specified with a string to a resolved path", function() {
 
   owner.register('model:article', App.Article);
   owner.register('model:comment', App.Comment);
-  owner.register('store:main', Ember.Model.Store);
+  owner.register('service:store', Ember.Model.Store);
   var comment = App.Comment.create();
   Ember.setOwner(comment, owner);
   Ember.run(comment, comment.load, 1, { article: { id: 'a' } });
@@ -327,7 +327,7 @@ test("should be able to set embedded relationship to null", function() {
   ok(comment.save());
 });
 
-test("should be able to set nonembedded relationship to null", function() {
+test("should be able to set nonembedded relationship to undefined", function() {
   expect(2);
 
   var Author = Ember.Model.extend({
@@ -354,7 +354,7 @@ test("should be able to set nonembedded relationship to null", function() {
   });
 
   equal(post.get('author'), null);
-  deepEqual(post.toJSON(), {id: 1, author_id: null});
+  deepEqual(post.toJSON(), {id: 1, author_id: undefined});
 });
 
 test("materializing the relationship should should not dirty the record", function() {
@@ -740,7 +740,7 @@ test("non embedded belongsTo should return a record with an owner", function() {
 
   owner.register('model:article', App.Article);
   owner.register('model:comment', App.Comment);
-  owner.register('store:main', Ember.Model.Store);
+  owner.register('service:store', Ember.Model.Store);
 
   var comment = App.Comment.create();
   Ember.setOwner(comment, owner);

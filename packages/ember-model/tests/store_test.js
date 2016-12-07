@@ -77,7 +77,7 @@ module("Ember.Model.Store", {
     owner.register('model:test', TestModel);
     owner.register('model:embedded', EmbeddedModel);
     owner.register('model:uuid', UUIDModel);
-    owner.register('store:main', Ember.Model.Store);
+    owner.register('service:store', Ember.Model.Store);
   }
 });
 
@@ -237,8 +237,7 @@ test("Registering a custom store on application works", function() {
   });
 
   var container = App.__container__;
-  ok(container.lookup('store:application'));
-  ok(container.lookup('store:main').get('custom'));
+  ok(container.lookup('service:store').get('custom'));
 
   var testRoute = container.lookup('route:test');
   ok(testRoute.get('store.custom'));

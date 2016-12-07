@@ -663,7 +663,7 @@ test("toJSON works with string names", function() {
   owner.register('model:comment', Comment);
   owner.register('model:author', Author);
   owner.register('model:article', Article);
-  owner.register('store:main', Ember.Model.Store);
+  owner.register('service:store', Ember.Model.Store);
 
   var articleData = {
     id: 1,
