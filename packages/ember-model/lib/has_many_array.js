@@ -224,7 +224,8 @@ Ember.EmbeddedHasManyArray = Ember.ManyArray.extend({
     var store;
     var type;
 
-    if (isPolymorphic && klass.polymorphicType) {
+    if (isPolymorphic) {
+      Ember.assert('The class ' + klass.toString() + ' is missing the polymorphicType implementation.', klass.polymorphicType);
       owner = Ember.getOwner(this);
       store = owner.lookup('service:store');
       type =  klass.polymorphicType(attrs);
@@ -252,7 +253,8 @@ Ember.EmbeddedHasManyArray = Ember.ManyArray.extend({
       record = reference.record;
       Ember.setOwner(record, owner);
     } else {
-      if (isPolymorphic && klass.polymorphicType) {
+      if (isPolymorphic) {
+        Ember.assert('The class ' + klass.toString() + ' is missing the polymorphicType implementation.', klass.polymorphicType);
         store = owner.lookup('service:store');
         type =  klass.polymorphicType(attrs);
         klass = store.modelFor(type);

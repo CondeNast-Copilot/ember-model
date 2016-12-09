@@ -160,3 +160,39 @@ test('models have the right type when creating a new polymorphic item', function
 
   ok(media[3] instanceof ClipModel, 'Instance of Clip');
 });
+
+test('models fail assertion when there is no polymorphicType implementation', function () {
+  expect(1);
+  var MediaModel = store.modelFor('media');
+  MediaModel.reopenClass({
+    polymorphicType: null
+  });
+  var ArticleModel = store.modelFor('article');
+  var article = ArticleModel.create();
+  Ember.setOwner(article, owner);
+  Ember.run(article, article.load, 1, ArticleModel.FIXTURES[0]);
+  throws(function () {
+    Ember.run(article, article.get, 'media.firstObject');
+  }, 'assertion error thrown');
+});
+
+test('models fail assertion when creating a new item with no polymorphicType implementation', function () {
+  expect(1);
+  var MediaModel = store.modelFor('media');
+  MediaModel.reopenClass({
+    polymorphicType: null
+  });
+  var ArticleModel = store.modelFor('article');
+  var article = ArticleModel.create();
+  Ember.setOwner(article, owner);
+  Ember.run(article, article.load, 1, ArticleModel.FIXTURES[0]);
+  throws(function () {
+    article.get('media').create({
+      id: 8,
+      filename: 'foo.jpg',
+      meta: {
+        type: 'photo'
+      }
+    });
+  }, 'assertion error thrown');
+});
