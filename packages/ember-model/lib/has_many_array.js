@@ -188,27 +188,17 @@ Ember.ManyArray = Ember.RecordArray.extend({
 
 Ember.HasManyArray = Ember.ManyArray.extend({
   materializeRecord: function(idx, owner) {
-    var klass = get(this, 'modelClass');
-    var content = get(this, 'content');
-    var reference = content.objectAt(idx);
-    var record = reference.record;
-    var isPolymorphic = get(this, 'polymorphic');
-    var type;
-    var store;
+    var klass = get(this, 'modelClass'),
+        content = get(this, 'content'),
+        reference = content.objectAt(idx),
+        record = reference.record;
 
     if (record) {
-      if (!Ember.getOwner(record)) {
+      if (! Ember.getOwner(record)) {
         Ember.setOwner(record, owner);
       }
       return record;
     }
-
-    if (isPolymorphic) {
-      type = klass.polymorphicType(reference.data);
-      store = owner.lookup('service:store');
-      klass = store.modelFor(type);
-    }
-
     return klass._findFetchById(reference.id, false, owner);
   },
 
@@ -227,9 +217,21 @@ Ember.HasManyArray = Ember.ManyArray.extend({
 
 Ember.EmbeddedHasManyArray = Ember.ManyArray.extend({
   create: function(attrs) {
-    var klass = get(this, 'modelClass'),
-        record = klass.create(attrs);
+    var klass = get(this, 'modelClass');
+    var isPolymorphic = get(this, 'polymorphic');
+    var owner;
+    var record;
+    var store;
+    var type;
 
+    if (isPolymorphic && klass.polymorphicType) {
+      owner = Ember.getOwner(this);
+      store = owner.lookup('service:store');
+      type =  klass.polymorphicType(attrs);
+      klass = store.modelFor(type);
+    }
+
+    record = klass.create(attrs);
     this.pushObject(record);
 
     return record; // FIXME: inject parent's id
@@ -250,9 +252,9 @@ Ember.EmbeddedHasManyArray = Ember.ManyArray.extend({
       record = reference.record;
       Ember.setOwner(record, owner);
     } else {
-      if (isPolymorphic) {
+      if (isPolymorphic && klass.polymorphicType) {
         store = owner.lookup('service:store');
-        type = klass.polymorphicType(attrs);
+        type =  klass.polymorphicType(attrs);
         klass = store.modelFor(type);
       }
       record = klass.create({ _reference: reference });
