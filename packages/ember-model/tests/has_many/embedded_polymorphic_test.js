@@ -84,7 +84,7 @@ module("Polymorphic Ember.EmbeddedHasManyArray", {
   }
 });
 
-test('models have the right class type', function () {
+test('models have the right class type', function (assert) {
   expect(5);
   var ArticleModel = store.modelFor('article');
   var PhotoModel = store.modelFor('photo');
@@ -92,20 +92,20 @@ test('models have the right class type', function () {
   var article = ArticleModel.create();
   Ember.setOwner(article, owner);
   Ember.run(article, article.load, 1, ArticleModel.FIXTURES[0]);
-  equal(Ember.run(article, article.get, 'media.length'), 2, 'Article has two media items');
+  assert.equal(Ember.run(article, article.get, 'media.length'), 2, 'Article has two media items');
   
   var media = article.get('media').toArray();
   var photo = media[0];
   var clip = media[1];
 
-  equal(photo.get('filename'), 'foo.jpg', 'Photo filename is correct');
-  equal(clip.get('filename'), 'bar.mov', 'Clip filename is correct');
+  assert.equal(photo.get('filename'), 'foo.jpg', 'Photo filename is correct');
+  assert.equal(clip.get('filename'), 'bar.mov', 'Clip filename is correct');
 
-  ok(photo instanceof PhotoModel, 'Instance of first member is Photo');
-  ok(clip instanceof ClipModel, 'Instance of second member is Clip');
+  assert.ok(photo instanceof PhotoModel, 'Instance of first member is Photo');
+  assert.ok(clip instanceof ClipModel, 'Instance of second member is Clip');
 });
 
-test('models have the right type when adding a new polymorphic item', function () {
+test('models have the right type when adding a new polymorphic item', function (assert) {
   expect(3);
   var ArticleModel = store.modelFor('article');
   var PhotoModel = store.modelFor('photo');
@@ -113,18 +113,18 @@ test('models have the right type when adding a new polymorphic item', function (
   var article = ArticleModel.create();
   Ember.setOwner(article, owner);
   Ember.run(article, article.load, 1, ArticleModel.FIXTURES[0]);
-  equal(Ember.run(article, article.get, 'media.length'), 2, 'Article has two media items');
+  assert.equal(Ember.run(article, article.get, 'media.length'), 2, 'Article has two media items');
 
   photoRecord.set('id', 4);
   article.get('media').pushObject(photoRecord);
 
-  equal(Ember.run(article, article.get, 'media.length'), 3, 'Article has two media items');
+  assert.equal(Ember.run(article, article.get, 'media.length'), 3, 'Article has two media items');
   var media = article.get('media').toArray();
 
-  ok(media[2] instanceof PhotoModel, 'Instance of Photo');
+  assert.ok(media[2] instanceof PhotoModel, 'Instance of Photo');
 });
 
-test('models have the right type when creating a new polymorphic item', function () {
+test('models have the right type when creating a new polymorphic item', function (assert) {
   expect(5);
   var ArticleModel = store.modelFor('article');
   var PhotoModel = store.modelFor('photo');
@@ -132,7 +132,7 @@ test('models have the right type when creating a new polymorphic item', function
   var article = ArticleModel.create();
   Ember.setOwner(article, owner);
   Ember.run(article, article.load, 1, ArticleModel.FIXTURES[0]);
-  equal(Ember.run(article, article.get, 'media.length'), 2, 'Article has two media items');
+  assert.equal(Ember.run(article, article.get, 'media.length'), 2, 'Article has two media items');
 
   article.get('media').create({
     id: 8,
@@ -142,10 +142,10 @@ test('models have the right type when creating a new polymorphic item', function
     }
   });
 
-  equal(Ember.run(article, article.get, 'media.length'), 3, 'Article has three media items');
+  assert.equal(Ember.run(article, article.get, 'media.length'), 3, 'Article has three media items');
   var media = article.get('media').toArray();
 
-  ok(media[2] instanceof PhotoModel, 'Instance of Photo');
+  assert.ok(media[2] instanceof PhotoModel, 'Instance of Photo');
 
   article.get('media').create({
     id: 5,
@@ -155,13 +155,13 @@ test('models have the right type when creating a new polymorphic item', function
     }
   });
 
-  equal(Ember.run(article, article.get, 'media.length'), 4, 'Article has four media items');
+  assert.equal(Ember.run(article, article.get, 'media.length'), 4, 'Article has four media items');
   media = article.get('media').toArray();
 
-  ok(media[3] instanceof ClipModel, 'Instance of Clip');
+  assert.ok(media[3] instanceof ClipModel, 'Instance of Clip');
 });
 
-test('models fail assertion when there is no polymorphicType implementation', function () {
+test('models fail assertion when there is no polymorphicType implementation', function (assert) {
   expect(1);
   var MediaModel = store.modelFor('media');
   MediaModel.reopenClass({
@@ -171,12 +171,12 @@ test('models fail assertion when there is no polymorphicType implementation', fu
   var article = ArticleModel.create();
   Ember.setOwner(article, owner);
   Ember.run(article, article.load, 1, ArticleModel.FIXTURES[0]);
-  throws(function () {
+  assert.throws(function () {
     Ember.run(article, article.get, 'media.firstObject');
   }, 'assertion error thrown');
 });
 
-test('models fail assertion when creating a new item with no polymorphicType implementation', function () {
+test('models fail assertion when creating a new item with no polymorphicType implementation', function (assert) {
   expect(1);
   var MediaModel = store.modelFor('media');
   MediaModel.reopenClass({
@@ -186,7 +186,7 @@ test('models fail assertion when creating a new item with no polymorphicType imp
   var article = ArticleModel.create();
   Ember.setOwner(article, owner);
   Ember.run(article, article.load, 1, ArticleModel.FIXTURES[0]);
-  throws(function () {
+  assert.throws(function () {
     article.get('media').create({
       id: 8,
       filename: 'foo.jpg',
