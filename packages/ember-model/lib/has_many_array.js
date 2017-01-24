@@ -192,7 +192,7 @@ Ember.HasManyArray = Ember.ManyArray.extend({
         content = get(this, 'content'),
         reference = content.objectAt(idx),
         record = reference.record;
-
+        console.log("hello");
     if (record) {
       if (! Ember.getOwner(record)) {
         Ember.setOwner(record, owner);
