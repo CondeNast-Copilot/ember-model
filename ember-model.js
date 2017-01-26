@@ -1301,7 +1301,6 @@ Ember.Model.reopenClass({
         }
       }
     }
-    this.reopenClass({adapter:store.adapterFor(record.type)})
     return record;
   },
 
