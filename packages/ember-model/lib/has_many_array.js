@@ -192,7 +192,6 @@ Ember.HasManyArray = Ember.ManyArray.extend({
         content = get(this, 'content'),
         reference = content.objectAt(idx),
         record = reference.record;
-        console.log("hello");
     if (record) {
       if (! Ember.getOwner(record)) {
         Ember.setOwner(record, owner);
@@ -258,6 +257,7 @@ Ember.EmbeddedHasManyArray = Ember.ManyArray.extend({
         store = owner.lookup('service:store');
         type =  klass.polymorphicType(attrs);
         klass = store.modelFor(type);
+        klass.reopenClass({adapter: store.adapterFor(type)});
       }
       record = klass.create({ _reference: reference });
       reference.record = record;

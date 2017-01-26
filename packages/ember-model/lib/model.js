@@ -740,6 +740,8 @@ Ember.Model.reopenClass({
       }
     }
 
+    var store = owner.lookup('service:store');
+    this.reopenClass({adapter:store.adapterFor(record.type)});
     return record;
   },
 
