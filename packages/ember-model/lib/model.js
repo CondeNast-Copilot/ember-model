@@ -739,9 +739,6 @@ Ember.Model.reopenClass({
         }
       }
     }
-
-    var store = owner.lookup('service:store');
-    this.reopenClass({adapter:store.adapterFor(record.type)});
     return record;
   },
 
@@ -814,7 +811,12 @@ Ember.Model.reopenClass({
     }
     Ember.setOwner(record, owner);
     // set(record, 'data', data);
+    
     record.load(data[get(this, 'primaryKey')], data);
+    if (owner) {
+      var store = owner.lookup('service:store');
+      this.reopenClass({adapter:store.adapterFor(record.type)});
+    }
     return record;
   },
 
