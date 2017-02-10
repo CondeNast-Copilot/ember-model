@@ -19,7 +19,7 @@ test(".find({}) delegates to the adapter's findQuery method", function() {
   var records = Model.find({query: "derp"});
   ok(records instanceof Ember.RecordArray, "RecordArray is returned");
   ok(!records.get('isLoaded'), "RecordArray isn't initially loaded");
-  ok(!(Model.recordArrays || Ember.A()).contains(records), "The RecordArray created by a findQuery should not be registered");
+  ok(!(Model.recordArrays || Ember.A()).includes(records), "The RecordArray created by a findQuery should not be registered");
 
   stop();
   records.one('didLoad', function() {

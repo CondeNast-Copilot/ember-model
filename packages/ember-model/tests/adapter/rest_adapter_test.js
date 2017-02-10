@@ -1,4 +1,17 @@
-var RESTModel, adapter, _ajax;
+var RESTModel, adapter, _ajax, store, registry, owner, App;
+
+function buildOwner() {
+  var Owner = Ember.Object.extend(Ember._RegistryProxyMixin, Ember._ContainerProxyMixin, {
+    init: function() {
+      this._super.apply(arguments);
+      var registry = new Ember.Registry(this._registryOptions);
+      this.__registry__ = registry;
+      this.__container__ = registry.container({ owner: this });
+    }
+  });
+
+  return Owner.create();
+}
 
 function ajaxSuccess(data) {
   return new Ember.RSVP.Promise(function(resolve, reject) {
@@ -35,13 +48,20 @@ module("Ember.RESTAdapter - with a url specified", {
   setup: function() {
     RESTModel = Ember.Model.extend({
       id: Ember.attr(),
-      name: Ember.attr()
+      name: Ember.attr(),
+      type: 'test'
     });
     RESTModel.url = "/posts";
     RESTModel.collectionKey = "posts";
     RESTModel.rootKey = "post";
     adapter = RESTModel.adapter = Ember.RESTAdapter.create();
     _ajax = adapter._ajax;
+    owner = buildOwner();
+    Ember.setOwner(RESTModel, owner);
+    store = Ember.Model.Store.create();
+    Ember.setOwner(store, owner);
+    owner.register('model:test', RESTModel);
+    owner.register('service:store', Ember.Model.Store);
   }
 });
 
@@ -66,7 +86,6 @@ test("findAll loads the full JSON payload when collectionKey isn't specified", f
     ],
     records;
   RESTModel.collectionKey = undefined;
-
   adapter._ajax = function(url, params, method) {
     return ajaxSuccess(data);
   };
@@ -724,7 +743,8 @@ test("Expect ajax settings to include a custom header", function() {
 module("Ember.RESTAdapter - with custom ajax settings passed from create", {
   setup: function() {
     RESTModel = Ember.Model.extend({
-      name: Ember.attr()
+      name: Ember.attr(),
+      type: 'test'
     });
     RESTModel.url = "/posts";
     RESTModel.collectionKey = "posts";
@@ -741,6 +761,12 @@ module("Ember.RESTAdapter - with custom ajax settings passed from create", {
         };
       }
     });
+    owner = buildOwner();
+    Ember.setOwner(RESTModel, owner);
+    store = Ember.Model.Store.create();
+    Ember.setOwner(store, owner);
+    owner.register('model:test', RESTModel);
+    owner.register('service:store', Ember.Model.Store);
     _ajax = adapter._ajax;
   }
 });

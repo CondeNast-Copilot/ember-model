@@ -15,7 +15,6 @@ test("multiple calls to Model#find within the same run loop coalesce into a find
       deepEqual(ids, [1,2,3], "The correct ids were passed into findMany");
     }
   };
-
   Ember.run(function() {
     Model.find(1);
     Model.find(2);

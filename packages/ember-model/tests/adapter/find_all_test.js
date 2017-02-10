@@ -1,17 +1,39 @@
+var store, registry, owner, App;
+
+function buildOwner() {
+  var Owner = Ember.Object.extend(Ember._RegistryProxyMixin, Ember._ContainerProxyMixin, {
+    init: function() {
+      this._super.apply(arguments);
+      var registry = new Ember.Registry(this._registryOptions);
+      this.__registry__ = registry;
+      this.__container__ = registry.container({ owner: this });
+    }
+  });
+
+  return Owner.create();
+}
 module("Ember.Adapter#findAll");
 
 test("Model.find() delegates to Adapter#findAll", function() {
   expect(7);
 
   var Model = Ember.Model.extend({
-    name: Ember.attr()
+    name: Ember.attr(),
+    type: 'test'
   });
   Model.adapter = Ember.FixtureAdapter.create();
   Model.FIXTURES = [
     {id: 1, name: 'Erik'}
   ];
 
+  owner = buildOwner();
+  store = Ember.Model.Store.create();
+  Ember.setOwner(store, owner);
+  owner.register('model:test', Model);
+  owner.register('service:store', Ember.Model.Store);
+
   var records = Ember.run(Model, Model.find);
+  Ember.setOwner(records, owner);
   ok(records instanceof Ember.RecordArray, "RecordArray is returned");
   ok(!records.get('isLoaded'));
   ok(records.get('isLoading'));

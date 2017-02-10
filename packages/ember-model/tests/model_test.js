@@ -1,4 +1,4 @@
-var Model, ModelWithoutID;
+var Model, ModelWithoutID, owner, store;
 
 function buildOwner() {
   var Owner = Ember.Object.extend(Ember._RegistryProxyMixin, Ember._ContainerProxyMixin, {
@@ -17,19 +17,27 @@ module("Ember.Model", {
   setup: function() {
     Model = Ember.Model.extend({
       token: Ember.attr(),
-      name: Ember.attr()
+      name: Ember.attr(),
+      type: 'test'
     });
     Model.primaryKey = 'token';
     Model.adapter = Ember.FixtureAdapter.create();
     Model.FIXTURES = [
       {token: 'a', name: 'Erik'}
     ];
+    owner = buildOwner();
     ModelWithoutID = Model.extend();
     ModelWithoutID.adapter = Ember.FixtureAdapter.create();
     ModelWithoutID.FIXTURES = [
       {name: 'Erik'},
       {name: 'Alex'}
     ];
+    Ember.setOwner(ModelWithoutID, owner);
+    Ember.setOwner(Model, owner);
+    store = Ember.Model.Store.create();
+    Ember.setOwner(store, owner);
+    owner.register('model:test', Model);
+    owner.register('service:store', Ember.Model.Store);
   },
   teardown: function() {
 
@@ -38,7 +46,6 @@ module("Ember.Model", {
 
 test("creates reference when creating record", function() {
   expect(4);
-
   var nextClientId = Model._clientIdCounter,
       model = Model.create({ token: 'abc123' }),
       reference = model._reference,
@@ -596,17 +603,33 @@ test("toJSON includes embedded relationships", function() {
 });
 
 test("toJSON includes non-embedded relationships", function() {
+  function buildOwner() {
+    var Owner = Ember.Object.extend(Ember._RegistryProxyMixin, Ember._ContainerProxyMixin, {
+      init: function() {
+        this._super.apply(arguments);
+        var registry = new Ember.Registry(this._registryOptions);
+        this.__registry__ = registry;
+        this.__container__ = registry.container({ owner: this });
+      }
+    });
+
+    return Owner.create();
+  }
+
   var Comment = Ember.Model.extend({
         id: Ember.attr(),
-        text: Ember.attr()
+        text: Ember.attr(),
+        type:'test'
       }),
       Author = Ember.Model.extend({
         id: Ember.attr(),
-        name: Ember.attr()
+        name: Ember.attr(),
+        type: 'test'
       }),
       Article = Ember.Model.extend({
         id: 1,
         title: Ember.attr(),
+        type: 'test',
         comments: Ember.hasMany(Comment, { key: 'comments' }),
         author: Ember.belongsTo(Author, { key: 'author' })
       });
@@ -617,6 +640,16 @@ test("toJSON includes non-embedded relationships", function() {
     comments: [1, 2, 3],
     author: 1
   };
+  owner = buildOwner();
+  store = Ember.Model.Store.create();
+  Ember.setOwner(store, owner);
+  Ember.setOwner(Comment, owner);
+  Ember.setOwner(Author, owner);
+  Ember.setOwner(Article, owner);
+  owner.register('model:test', Comment);
+  owner.register('model:test', Author);
+  owner.register('model:test', Article);
+  owner.register('service:store', Ember.Model.Store);
 
   Author.adapter = Ember.FixtureAdapter.create();
   Comment.adapter = Ember.FixtureAdapter.create();
@@ -647,14 +680,17 @@ test("toJSON works with string names", function() {
 
   var Comment = Ember.Model.extend({
         id: Ember.attr(),
-        text: Ember.attr()
+        text: Ember.attr(),
+        type: 'comment'
       }),
       Author = Ember.Model.extend({
         id: Ember.attr(),
-        name: Ember.attr()
+        name: Ember.attr(),
+        type:'author'
       }),
       Article = Ember.Model.extend({
         id: 1,
+        type: 'article',
         title: Ember.attr(),
         comments: Ember.hasMany('comment', { key: 'comments' }),
         author: Ember.belongsTo('author', { key: 'author' })
@@ -677,7 +713,7 @@ test("toJSON works with string names", function() {
 
   Author.FIXTURES = [{id: 1, name: 'drogus'}];
   Comment.FIXTURES = [
-    {id: 1, text: 'uno'},
+    {id: 1, text: 'uno1'},
     {id: 2, text: 'dos'},
     {id: 3, text: 'tres'}
   ];
@@ -701,13 +737,16 @@ test("creating a record with camelizedKeys = true works as expected", function()
   expect(1);
 
   var Page = Ember.Model.extend({
-    someAuthor: Ember.attr()
+    someAuthor: Ember.attr(),
+    type: 'test'
   });
+  owner.register('model:test', Page);
   Page.camelizeKeys = true;
   Page.adapter = Ember.FixtureAdapter.create();
   Page.FIXTURES = [];
-
+  Ember.setOwner(Page, owner);
   var record = Page.create({someAuthor: 'Brian'});
+  Ember.setOwner(record, owner);
 
   record.save();
   stop();

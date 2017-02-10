@@ -1,10 +1,24 @@
-var Model;
+var Model, owner, store;
+
+function buildOwner() {
+  var Owner = Ember.Object.extend(Ember._RegistryProxyMixin, Ember._ContainerProxyMixin, {
+    init: function() {
+      this._super.apply(arguments);
+      var registry = new Ember.Registry(this._registryOptions);
+      this.__registry__ = registry;
+      this.__container__ = registry.container({ owner: this });
+    }
+  });
+
+  return Owner.create();
+}
 
 module("Ember.FilteredRecordArray", {
   setup: function() {
     Model = Ember.Model.extend({
       id: Ember.attr(),
-      name: Ember.attr()
+      name: Ember.attr(),
+      type: 'test'
     });
     Model.adapter = Ember.FixtureAdapter.create();
     Model.FIXTURES = [
@@ -12,6 +26,12 @@ module("Ember.FilteredRecordArray", {
       {id:     2, name: 'Stefan'},
       {id: 'abc', name: 'Charles'}
     ];
+    owner = buildOwner();
+    Ember.setOwner(Model, owner);
+    store = Ember.Model.Store.create();
+    Ember.setOwner(store, owner);
+    owner.register('model:test', Model);
+    owner.register('service:store', Ember.Model.Store);
   },
   teardown: function() { }
 });

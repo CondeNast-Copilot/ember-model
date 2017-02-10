@@ -1,0 +1,139 @@
+Searching 75 files for "dos"
+
+/Users/dkorenbl/Desktop/dev/ember-model/packages/ember-model/tests/has_many/embedded_manipulation_test.js:
+    9      comments: [
+   10        {id: 1, text: 'uno'},
+   11:       {id: 2, text: 'dos'},
+   12        {id: 3, text: 'tres'}
+   13      ]
+   ..
+   50      comments: [
+   51        {id: 1, text: 'uno'},
+   52:       {id: 2, text: 'dos'},
+   53        {id: 3, text: 'tres'}
+   54      ]
+   ..
+   69  
+   70    var comments = article.get('comments'),
+   71:       dos = comments.objectAt(1);
+   72  
+   73:   comments.removeObject(dos);
+   74  
+   75    equal(comments.get('length'), 2, "There are now only two items in the array");
+
+/Users/dkorenbl/Desktop/dev/ember-model/packages/ember-model/tests/has_many/embedded_objects_load_test.js:
+    9      comments: [
+   10        {id: 1, text: 'uno'},
+   11:       {id: 2, text: 'dos'},
+   12        // ensure that records without an id work correctly
+   13        {text: 'tres'}
+   ..
+   32    equal(comments.get('length'), 3);
+   33    ok(Ember.run(comments, comments.get, 'firstObject') instanceof Comment);
+   34:   deepEqual(Ember.run(comments, comments.mapBy, 'text'), ['uno', 'dos', 'tres']);
+   35    ok(!comments.isEvery('isNew'), "Records should not be new");
+   36  });
+
+/Users/dkorenbl/Desktop/dev/ember-model/packages/ember-model/tests/has_many/embedded_objects_save_test.js:
+    9      comments: [
+   10        {id: 1, text: 'uno'},
+   11:       {id: 2, text: 'dos'},
+   12        {id: 3, text: 'tres'}
+   13      ]
+   ..
+   55    equal(comments.get('length'), 4);
+   56    ok(newComment instanceof Comment);
+   57:   deepEqual(Ember.run(comments, comments.mapBy, 'text'), ['uno', 'dos', 'tres', 'quattro']);
+   58  
+   59    Ember.run(function() {
+
+/Users/dkorenbl/Desktop/dev/ember-model/packages/ember-model/tests/has_many/manipulation_test.js:
+   23    Comment.FIXTURES = [
+   24      {id: 1, text: 'uno'},
+   25:     {id: 2, text: 'dos'},
+   26      {id: 3, text: 'tres'}
+   27    ];
+   ..
+   62    Comment.FIXTURES = [
+   63      {id: 1, text: 'uno'},
+   64:     {id: 2, text: 'dos'},
+   65      {id: 3, text: 'tres'}
+   66    ];
+   ..
+  106    Comment.FIXTURES = [
+  107      {id: 1, text: 'uno'},
+  108:     {id: 2, text: 'dos'},
+  109      {id: 3, text: 'tres'}
+  110    ];
+  ...
+  148    Comment.FIXTURES = [
+  149      {id: 1, text: 'uno'},
+  150:     {id: 2, text: 'dos'},
+  151      {id: 3, text: 'tres'}
+  152    ];
+  ...
+  156  
+  157    var comments = article.get('comments'),
+  158:       dos = comments.objectAt(1);
+  159  
+  160:   comments.removeObject(dos);
+  161  
+  162    equal(comments.get('length'), 2, "There are now only two items in the array");
+  ...
+  189    Comment.FIXTURES = [
+  190      {id: 1, text: 'uno'},
+  191:     {id: 2, text: 'dos'},
+  192      {id: 3, text: 'tres'}
+  193    ];
+  ...
+  228    Comment.FIXTURES = [
+  229      {id: 1, text: 'uno'},
+  230:     {id: 2, text: 'dos'},
+  231      {id: 3, text: 'tres'}
+  232    ];
+  ...
+  267    Comment.FIXTURES = [
+  268      {id: 1, text: 'uno'},
+  269:     {id: 2, text: 'dos'},
+  270      {id: 3, text: 'tres'}
+  271    ];
+
+/Users/dkorenbl/Desktop/dev/ember-model/packages/ember-model/tests/has_many/objects_load_test.js:
+   26  //  Comment.FIXTURES = [
+   27  //    {id: 1, text: 'uno'},
+   28: //    {id: 2, text: 'dos'},
+   29  //    {id: 3, text: 'tres'}
+   30  //  ];
+   ..
+   44  //    equal(comments.get('length'), 3, "There are 3 comments");
+   45  //    ok(Ember.run(comments, comments.get, 'firstObject') instanceof Comment, "The first object is a Comment object");
+   46: //    deepEqual(Ember.run(comments, comments.mapProperty, 'text'), ['uno', 'dos', 'tres'], "The comments are loaded");
+   47  //    ok(!comments.everyProperty('isNew'), "Records should not be new");
+   48  //  });
+
+/Users/dkorenbl/Desktop/dev/ember-model/packages/ember-model/tests/model_test.js:
+  589      comments: [
+  590        {id: 1, text: 'uno'},
+  591:       {id: 2, text: 'dos'},
+  592        {id: 3, text: 'tres'}
+  593      ],
+  ...
+  600    var json = Ember.run(article, article.toJSON);
+  601  
+  602:   deepEqual(json.comments.map(function(c) { return c.text; }), ['uno', 'dos', 'tres'], "JSON should contain serialized records from hasMany relationship");
+  603    equal(json.author.name, 'drogus', "JSON should contain serialized record from belongsTo relationship");
+  604  });
+  ...
+  633    Comment.FIXTURES = [
+  634      {id: 1, text: 'uno'},
+  635:     {id: 2, text: 'dos'},
+  636      {id: 3, text: 'tres'}
+  637    ];
+  ...
+  687    Comment.FIXTURES = [
+  688      {id: 1, text: 'uno'},
+  689:     {id: 2, text: 'dos'},
+  690      {id: 3, text: 'tres'}
+  691    ];
+
+23 matches across 6 files

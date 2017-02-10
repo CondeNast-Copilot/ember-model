@@ -805,6 +805,9 @@ Ember.Model.reopenClass({
   // FIXME
   findFromCacheOrLoad: function(data, owner) {
     var record;
+    if (!owner) {
+      owner = Ember.getOwner(this);
+    }
     if (!data[get(this, 'primaryKey')]) {
       record = this.create({isLoaded: false});
     } else {

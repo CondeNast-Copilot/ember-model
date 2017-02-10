@@ -1,4 +1,4 @@
-var Model, owner;
+var Model, owner, store;
 
 function buildOwner() {
   var Owner = Ember.Object.extend(Ember._RegistryProxyMixin, Ember._ContainerProxyMixin, {
@@ -23,7 +23,8 @@ module("Ember.RecordArray", {
   setup: function() {
     Model = Ember.Model.extend({
       id: Ember.attr(),
-      name: Ember.attr()
+      name: Ember.attr(),
+      type: 'test'
     });
     Model.adapter = Ember.FixtureAdapter.create();
     Model.FIXTURES = [
@@ -31,14 +32,17 @@ module("Ember.RecordArray", {
       {id: 2, name: 'Stefan'},
       {id: 3, name: 'Kris'}
     ];
-    owner = buildOwner();
-  },
-  teardown: function() { }
+    owner = buildOwner(); 
+    store = Ember.Model.Store.create();
+    Ember.setOwner(store, owner);
+    Ember.setOwner(Model, owner);
+    owner.register('model:test', Model);
+    owner.register('service:store', Ember.Model.Store);
+  }
 });
 
 test("load creates records with owner when owner exists", function() {
   var records = Ember.RecordArray.create({modelClass: Model});
-  Ember.setOwner(records, owner);
   Ember.run(records, records.load, Model, Model.FIXTURES);
   records.forEach(function(record){
     ok(record.get('isLoaded'));
@@ -48,7 +52,7 @@ test("load creates records with owner when owner exists", function() {
 
 test("when called with findMany, should contain an array of the IDs contained in the RecordArray", function() {
   var records = Ember.run(Model, Model.find, [1,2,3]);
-
+  Ember.setOwner(records, owner);
   deepEqual(records.get('_ids'), [1,2,3]);
   equal(records.get('length'), 0);
   ok(!records.get('isLoaded'));
@@ -69,14 +73,16 @@ test("findAll RecordArray implements reload", function() {
       ],
       RESTModel = Ember.Model.extend({
         id: Ember.attr(),
-        name: Ember.attr()
+        name: Ember.attr(),
+        type: 'test'
       }),
       adapter = Ember.RESTAdapter.create(),
       records, changed;
 
   RESTModel.url = '/fake/api';
   RESTModel.adapter = adapter;
-
+  Ember.setOwner(RESTModel, owner);
+  owner.register('model:test', RESTModel);
   adapter._ajax = function(url, params, method) {
     return ajaxSuccess(data);
   };
@@ -109,14 +115,16 @@ test("findQuery RecordArray implements reload", function() {
       ],
       RESTModel = Ember.Model.extend({
         id: Ember.attr(),
-        name: Ember.attr()
+        name: Ember.attr(),
+        type: 'test'
       }),
       adapter = Ember.RESTAdapter.create(),
       records, changed;
 
   RESTModel.url = '/fake/api';
   RESTModel.adapter = adapter;
-
+  Ember.setOwner(RESTModel, owner);
+  owner.register('model:test', RESTModel);
   adapter._ajax = function(url, params, method) {
     return ajaxSuccess(data);
   };
@@ -149,13 +157,16 @@ test("findMany RecordArray implements reload", function() {
       ],
       RESTModel = Ember.Model.extend({
         id: Ember.attr(),
-        name: Ember.attr()
+        name: Ember.attr(),
+        type: 'test'
       }),
       adapter = Ember.RESTAdapter.create(),
       records, changed;
 
   RESTModel.url = '/fake/api';
   RESTModel.adapter = adapter;
+  Ember.setOwner(RESTModel, owner);
+  owner.register('model:test', RESTModel);
 
   adapter.findMany = function(klass, records, ids) {
     return adapter.findAll(klass, records);
@@ -193,13 +204,16 @@ test("reload handles record removal", function() {
       ],
       RESTModel = Ember.Model.extend({
         id: Ember.attr(),
-        name: Ember.attr()
+        name: Ember.attr(),
+        type: 'test'
       }),
       adapter = Ember.RESTAdapter.create(),
       records, changed;
 
   RESTModel.url = '/fake/api';
   RESTModel.adapter = adapter;
+  Ember.setOwner(RESTModel, owner);
+  owner.register('model:test', RESTModel);
 
   adapter._ajax = function(url, params, method) {
     return ajaxSuccess(data);
@@ -230,14 +244,17 @@ test("RecordArray handles already inserted new models being saved", function() {
       ],
       RESTModel = Ember.Model.extend({
         id: Ember.attr(),
-        name: Ember.attr()
+        name: Ember.attr(),
+        type:'test'
       }),
       adapter = Ember.RESTAdapter.create(),
       records, changed;
 
   RESTModel.url = '/fake/api';
   RESTModel.adapter = adapter;
-
+  Ember.setOwner(RESTModel, owner);
+  owner.register('model:test', RESTModel);
+  
   adapter._ajax = function(url, params, method) {
     return ajaxSuccess(data);
   };

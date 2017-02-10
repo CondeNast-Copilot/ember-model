@@ -1,12 +1,32 @@
-var FixtureModel, adapter;
+var FixtureModel, adapter, store, registry, owner, App;
+
+function buildOwner() {
+  var Owner = Ember.Object.extend(Ember._RegistryProxyMixin, Ember._ContainerProxyMixin, {
+    init: function() {
+      this._super.apply(arguments);
+      var registry = new Ember.Registry(this._registryOptions);
+      this.__registry__ = registry;
+      this.__container__ = registry.container({ owner: this });
+    }
+  });
+
+  return Owner.create();
+}
 
 module("Ember.FixtureAdapter", {
   setup: function() {
     FixtureModel = Ember.Model.extend({
+      type: 'test',
       id: Ember.attr(),
       name: Ember.attr()
     });
     adapter = FixtureModel.adapter = Ember.FixtureAdapter.create();
+    owner = buildOwner();
+    Ember.setOwner(FixtureModel, owner);
+    store = Ember.Model.Store.create();
+    Ember.setOwner(store, owner);
+    owner.register('model:test', FixtureModel);
+    owner.register('service:store', Ember.Model.Store);
   }
 });
 
@@ -19,7 +39,7 @@ test("fetch loads the full FIXTURES payload when id isn't specified", function()
     ];
     
   FixtureModel.FIXTURES = data;
-
+  
   FixtureModel.fetch().then(function(records) {
     start();
     equal(records.get('length'), data.length, "The proper number of items should have been loaded.");
@@ -70,7 +90,7 @@ test("createRecord", function() {
   FixtureModel.FIXTURES = [];
 
   var record = FixtureModel.create({name: "Erik"});
-
+  Ember.setOwner(record, owner);
   ok(record.get('isNew'), "Record should be new");
   ok(!record.get('id'), "Record #id should be undefined");
 
