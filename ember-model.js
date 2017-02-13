@@ -709,9 +709,6 @@ Ember.Model = Ember.Object.extend(Ember.Evented, {
 
     set(this, 'isNew', false);
     set(this, 'isLoaded', true);
-    var owner = Ember.getOwner(this);
-    var store = owner.lookup('service:store');
-    this.constructor.reopenClass({adapter:store.adapterFor(this.type)});
     this._createReference();
     this.trigger('didLoad');
   },
