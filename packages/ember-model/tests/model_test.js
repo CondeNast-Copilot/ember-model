@@ -603,19 +603,6 @@ test("toJSON includes embedded relationships", function() {
 });
 
 test("toJSON includes non-embedded relationships", function() {
-  function buildOwner() {
-    var Owner = Ember.Object.extend(Ember._RegistryProxyMixin, Ember._ContainerProxyMixin, {
-      init: function() {
-        this._super.apply(arguments);
-        var registry = new Ember.Registry(this._registryOptions);
-        this.__registry__ = registry;
-        this.__container__ = registry.container({ owner: this });
-      }
-    });
-
-    return Owner.create();
-  }
-
   var Comment = Ember.Model.extend({
         id: Ember.attr(),
         text: Ember.attr(),
@@ -713,7 +700,7 @@ test("toJSON works with string names", function() {
 
   Author.FIXTURES = [{id: 1, name: 'drogus'}];
   Comment.FIXTURES = [
-    {id: 1, text: 'uno1'},
+    {id: 1, text: 'uno'},
     {id: 2, text: 'dos'},
     {id: 3, text: 'tres'}
   ];

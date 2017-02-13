@@ -2,6 +2,7 @@ module("Ember.Adapter#findMany");
 
 test(".find([]) delegates to the adapter's findMany method", function() {
   expect(8);
+  
   var Model = Ember.Model.extend();
   Model.adapter = {
     findMany: function(klass, adapterRecords, ids) {

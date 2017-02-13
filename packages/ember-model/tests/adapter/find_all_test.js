@@ -27,13 +27,13 @@ test("Model.find() delegates to Adapter#findAll", function() {
   ];
 
   owner = buildOwner();
+  Ember.setOwner(Model, owner);
+  owner.register('model:test', Model);
   store = Ember.Model.Store.create();
   Ember.setOwner(store, owner);
-  owner.register('model:test', Model);
   owner.register('service:store', Ember.Model.Store);
 
   var records = Ember.run(Model, Model.find);
-  Ember.setOwner(records, owner);
   ok(records instanceof Ember.RecordArray, "RecordArray is returned");
   ok(!records.get('isLoaded'));
   ok(records.get('isLoading'));

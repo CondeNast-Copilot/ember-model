@@ -38,8 +38,7 @@ test("fetch loads the full FIXTURES payload when id isn't specified", function()
       {id: 2, name: 'Aaron'}
     ];
     
-  FixtureModel.FIXTURES = data;
-  
+  FixtureModel.FIXTURES = data; 
   FixtureModel.fetch().then(function(records) {
     start();
     equal(records.get('length'), data.length, "The proper number of items should have been loaded.");
@@ -90,7 +89,6 @@ test("createRecord", function() {
   FixtureModel.FIXTURES = [];
 
   var record = FixtureModel.create({name: "Erik"});
-  Ember.setOwner(record, owner);
   ok(record.get('isNew'), "Record should be new");
   ok(!record.get('id'), "Record #id should be undefined");
 
