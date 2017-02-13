@@ -257,7 +257,9 @@ Ember.EmbeddedHasManyArray = Ember.ManyArray.extend({
         store = owner.lookup('service:store');
         type =  klass.polymorphicType(attrs);
         klass = store.modelFor(type);
-        klass.reopenClass({adapter: store.adapterFor(type)});
+        if (!klass.adapter.serializer) {
+          klass.reopenClass({adapter: store.adapterFor(type)});
+        }
       }
       record = klass.create({ _reference: reference });
       reference.record = record;
