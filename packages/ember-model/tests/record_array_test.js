@@ -1,18 +1,5 @@
 var Model, owner, store, RESTModel, data;
 
-function buildOwner() {
-  var Owner = Ember.Object.extend(Ember._RegistryProxyMixin, Ember._ContainerProxyMixin, {
-    init: function() {
-      this._super.apply(arguments);
-      var registry = new Ember.Registry(this._registryOptions);
-      this.__registry__ = registry;
-      this.__container__ = registry.container({ owner: this });
-    }
-  });
-
-  return Owner.create();
-}
-
 function ajaxSuccess(data) {
   return new Ember.RSVP.Promise(function(resolve, reject) {
     resolve(data);

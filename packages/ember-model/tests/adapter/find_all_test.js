@@ -1,6 +1,6 @@
 var store, registry, owner, App;
 
-function buildOwner() {
+function buildOwner () {
   var Owner = Ember.Object.extend(Ember._RegistryProxyMixin, Ember._ContainerProxyMixin, {
     init: function() {
       this._super.apply(arguments);
@@ -12,6 +12,7 @@ function buildOwner() {
 
   return Owner.create();
 }
+
 module("Ember.Adapter#findAll");
 
 test("Model.find() delegates to Adapter#findAll", function() {

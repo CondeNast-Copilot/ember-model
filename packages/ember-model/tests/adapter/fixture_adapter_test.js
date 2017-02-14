@@ -1,18 +1,5 @@
 var FixtureModel, adapter, store, registry, owner, App;
 
-function buildOwner() {
-  var Owner = Ember.Object.extend(Ember._RegistryProxyMixin, Ember._ContainerProxyMixin, {
-    init: function() {
-      this._super.apply(arguments);
-      var registry = new Ember.Registry(this._registryOptions);
-      this.__registry__ = registry;
-      this.__container__ = registry.container({ owner: this });
-    }
-  });
-
-  return Owner.create();
-}
-
 module("Ember.FixtureAdapter", {
   setup: function() {
     FixtureModel = Ember.Model.extend({

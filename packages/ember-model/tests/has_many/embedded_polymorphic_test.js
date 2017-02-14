@@ -4,20 +4,6 @@ var get = Ember.get;
 var store;
 var owner;
 
-function buildOwner() {
-  var Owner = Ember.Object.extend(Ember._RegistryProxyMixin, Ember._ContainerProxyMixin, {
-    init: function() {
-      this._super.apply(arguments);
-      var registry = new Ember.Registry(this._registryOptions);
-      this.__registry__ = registry;
-      this.__container__ = registry.container({ owner: this });
-    }
-  });
-
-  return Owner.create();
-}
-
-
 module("Polymorphic Ember.EmbeddedHasManyArray", {
   setup: function() {
     var ARTICLE_FIXTURE = [{

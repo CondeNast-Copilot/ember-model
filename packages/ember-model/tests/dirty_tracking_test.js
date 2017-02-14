@@ -1,19 +1,6 @@
 var owner, store;
 var attr = Ember.attr;
 
-function buildOwner() {
-  var Owner = Ember.Object.extend(Ember._RegistryProxyMixin, Ember._ContainerProxyMixin, {
-    init: function() {
-      this._super.apply(arguments);
-      var registry = new Ember.Registry(this._registryOptions);
-      this.__registry__ = registry;
-      this.__container__ = registry.container({ owner: this });
-    }
-  });
-
-  return Owner.create();
-}
-
 module("Dirty tracking");
 
 test("when no properties have changed on a model, save should noop", function() {
