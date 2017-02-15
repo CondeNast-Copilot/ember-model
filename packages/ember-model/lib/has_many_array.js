@@ -258,7 +258,7 @@ Ember.EmbeddedHasManyArray = Ember.ManyArray.extend({
         type =  klass.polymorphicType(attrs);
         klass = store.modelFor(type);
         if (!klass.adapter.serializer) {
-          klass.reopenClass({adapter: store.adapterFor(type)});
+          Ember.set(klass, 'adapter', store.adapterFor(type));
         }
       }
       record = klass.create({ _reference: reference });
