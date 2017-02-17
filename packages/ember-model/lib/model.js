@@ -889,12 +889,14 @@ Ember.Model.reopenClass({
   },
 
   _cacheReference: function(reference) {
-    if (!this._referenceCache) { this._referenceCache = {}; }
+   if (!this.transient) {
+      if (!this._referenceCache) { this._referenceCache = {}; }
 
-    // if we're creating an item, this process will be done
-    // later, once the object has been persisted.
-    if (!Ember.isEmpty(reference.id)) {
-      this._referenceCache[reference.id] = reference;
+      // if we're creating an item, this process will be done
+      // later, once the object has been persisted.
+      if (!Ember.isEmpty(reference.id)) {
+        this._referenceCache[reference.id] = reference;
+      }
     }
   }
 });
