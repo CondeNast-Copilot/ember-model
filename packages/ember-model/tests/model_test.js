@@ -762,6 +762,44 @@ test("record is available in reference cache when load is run in cachedRecordFor
   ok(recordFromCache, 'record should be available in cache when running load');
 });
 
+test("reference cache is undefined from record when Model.transient is true in _createReference", function() {
+  var id = 1;
+  var recordFromCache,
+      Post = Ember.Model.extend({
+        id: id,
+        load: function() {
+          recordFromCache = this.constructor._referenceCache['1'].record;
+        }
+      });
+
+  Post.reopenClass({
+    transient: true
+  });
+
+  Post._createReference(1);
+
+  equal(Post._referenceCache[id], undefined, 'referenceCache at id is undefined when transient is true');
+});
+
+test("reference cache is available from record when Model.transient is false in _createReference", function() {
+  var id = 1;
+  var recordFromCache,
+      Post = Ember.Model.extend({
+        id: id,
+        load: function() {
+          recordFromCache = this.constructor._referenceCache['1'].record;
+        }
+      });
+
+  Post.reopenClass({
+    transient: false
+  });
+
+  Post._createReference(1);
+
+  equal(Post._referenceCache[id].id, 1, 'referenceCache has an id of 1 when transient is false');
+});
+
 test("fetchQuery returns a promise", function() {
   expect(1);
 
