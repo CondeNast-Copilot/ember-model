@@ -118,6 +118,12 @@ Ember.Model.reopen({
       return null;
     }
 
+    if (meta.options.polymorphic) {
+      Ember.assert('The class ' + type.toString() + ' is missing the polymorphicType implementation.', type.polymorphicType);
+      var typeName = type.polymorphicType(idOrAttrs);
+      type = store.modelFactoryFor(typeName);
+    }
+
     if (meta.options.embedded) {
       var primaryKey = get(type, 'primaryKey'),
         id = idOrAttrs[primaryKey];

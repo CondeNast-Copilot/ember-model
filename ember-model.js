@@ -831,6 +831,16 @@ Ember.Model = Ember.Object.extend(Ember.Evented, {
 
   save: function() {
     var adapter = this.constructor.adapter;
+    // This is a hack for Copilot to ensure at runtime that the correct
+    // serializer is used for the given type. This is not always the case
+    // because of how Ember Model caches the serilizer/adapter types
+    // and the use of polymorphic relationships
+    var type = this.get('type');
+    if (type) {
+      var store = Ember.getOwner(this).lookup('service:store');
+      var serializer = store.serializerFor(type);
+      adapter.set('serializer', serializer);
+    }
     set(this, 'isSaving', true);
     if (get(this, 'isNew')) {
       return adapter.createRecord(this);
@@ -1281,9 +1291,7 @@ Ember.Model.reopenClass({
   getCachedReferenceRecord: function(id, owner){
     var ref = this._getReferenceById(id);
     if(ref && ref.record) {
-      if (! Ember.getOwner(ref.record)) {
-        Ember.setOwner(ref.record, owner);
-      }
+      Ember.setOwner(ref.record, owner);
       return ref.record;
     }
     return undefined;
@@ -1709,6 +1717,12 @@ Ember.Model.reopen({
 
     if (Ember.isNone(idOrAttrs)) {
       return null;
+    }
+
+    if (meta.options.polymorphic) {
+      Ember.assert('The class ' + type.toString() + ' is missing the polymorphicType implementation.', type.polymorphicType);
+      var typeName = type.polymorphicType(idOrAttrs);
+      type = store.modelFactoryFor(typeName);
     }
 
     if (meta.options.embedded) {
@@ -2216,7 +2230,10 @@ Ember.Model.Store = Ember.Service.extend({
   modelFor: function(type) {
     var owner = Ember.getOwner(this);
     var Factory = owner.factoryFor('model:'+type);
-    return Factory && Factory.class;
+    if (Factory.class) {
+      Ember.setOwner(Factory.class, owner);
+      return Factory.class;
+    }
   },
 
   modelFactoryFor: function(modelName) {
