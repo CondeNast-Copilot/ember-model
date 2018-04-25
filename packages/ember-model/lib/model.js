@@ -263,14 +263,16 @@ Ember.Model = Ember.Object.extend(Ember.Evented, {
   },
 
   save: function() {
-    var adapter = this.constructor.adapter;
+    var type = this.get('type');
+    var owner = Ember.getOwner(this);
+    var typeAdapter = owner.lookup('adapter:' + type);
+    var adapter = typeAdapter || this.constructor.adapter;
     // This is a hack for Copilot to ensure at runtime that the correct
     // serializer is used for the given type. This is not always the case
     // because of how Ember Model caches the serilizer/adapter types
     // and the use of polymorphic relationships
-    var type = this.get('type');
     if (type) {
-      var store = Ember.getOwner(this).lookup('service:store');
+      var store = owner.lookup('service:store');
       var serializer = store.serializerFor(type);
       adapter.set('serializer', serializer);
     }
