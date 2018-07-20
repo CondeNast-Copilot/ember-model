@@ -71,6 +71,31 @@ test("using it in a model definition", function() {
   equal(Ember.run(article, article.get, 'comments.firstObject.token'), 'a');
 });
 
+test("notifyPropertyChange does not alter members", function() {
+  var Comment = Ember.Model.extend({
+        token: Ember.attr(String)
+      }),
+      Article = Ember.Model.extend({
+        comments: Ember.hasMany(Comment, { key: 'comments', embedded: true })
+      });
+
+  var owner = buildOwner();
+  Ember.setOwner(Comment, owner);
+  Ember.setOwner(Article, owner);
+
+  Comment.primaryKey = 'token';
+
+  var article = Article.create();
+
+  equal(article.get('comments.length'), 0);
+  var comment = Comment.create();
+  article.get('comments').pushObject(comment);
+  equal(article.get('comments.length'), 1);
+
+  article.notifyPropertyChange('comments');
+  equal(article.get('comments.length'), 1);
+});
+
 test("model can be specified with a string instead of a class", function() {
   var Article = Ember.Model.extend({
       comments: Ember.hasMany('Ember.CommentModel', { key: 'comments', embedded: true })

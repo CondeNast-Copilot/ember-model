@@ -1575,6 +1575,8 @@ Ember.hasMany = function(type, options) {
 
 Ember.Model.reopen({
   getHasMany: function(key, type, meta, owner) {
+    var existingCollection = this._hasManyArrays && this._hasManyArrays.find(arr => arr.key === key);
+    if (existingCollection) { return existingCollection; }
     var embedded = meta.options.embedded;
     var polymorphic = meta.options.polymorphic;
     var collectionClass = embedded ? Ember.EmbeddedHasManyArray : Ember.HasManyArray;
