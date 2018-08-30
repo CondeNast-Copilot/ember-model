@@ -695,8 +695,7 @@ Ember.Model = Ember.Object.extend(Ember.Evented, {
     for (var i = 0, l = relationships.length; i < l; i++) {
       var owner = Ember.getOwner(this);
       relationshipKey = relationships[i];
-      relationship = (meta.descs || this)[relationshipKey];
-      relationshipMeta = relationship.meta();
+      relationshipMeta = this.constructor.metaForProperty(relationshipKey);
 
       if (relationshipMeta.options.embedded) {
         relationshipType = relationshipMeta.type;
@@ -1685,8 +1684,7 @@ Ember.belongsTo = function(type, options) {
       }
 
       if (value) {
-        Ember.assert(Ember.String.fmt('Attempted to set property of type: %@ with a value of type: %@',
-                    [value.constructor, type]),
+        Ember.assert(`Attempted to set property of type: ${value.constructor} with a value of type: ${type}`,
                     value instanceof type);
       }
 
