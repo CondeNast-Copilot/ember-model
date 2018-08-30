@@ -128,8 +128,7 @@ Ember.Model = Ember.Object.extend(Ember.Evented, {
     for (var i = 0, l = relationships.length; i < l; i++) {
       var owner = Ember.getOwner(this);
       relationshipKey = relationships[i];
-      relationship = (meta.descs || this)[relationshipKey];
-      relationshipMeta = relationship.meta();
+      relationshipMeta = this.constructor.metaForProperty(relationshipKey);
 
       if (relationshipMeta.options.embedded) {
         relationshipType = relationshipMeta.type;
