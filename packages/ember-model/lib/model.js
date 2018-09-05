@@ -39,7 +39,7 @@ function isDescriptor(value) {
   return value && typeof value === 'object' && value.isDescriptor;
 }
 
-Ember.run.queues.push('data');
+// Ember.run.queues.push('data');
 
 Ember.Model = Ember.Object.extend(Ember.Evented, {
   isLoaded: true,
@@ -124,11 +124,17 @@ Ember.Model = Ember.Object.extend(Ember.Evented, {
 
 
     // eagerly load embedded data
-    var relationships = this.constructor._relationships || [], meta = Ember.meta(this), relationshipKey, relationship, relationshipMeta, relationshipData, relationshipType;
-    for (var i = 0, l = relationships.length; i < l; i++) {
+    var relationships = this.constructor._relationships || [];
+    var meta = Ember.meta(this);
+    // var relationshipKey;
+    var relationship;
+    // var relationshipMeta;
+    var relationshipData;
+    var relationshipType;
+    for (let [relationshipKey, relationshipMeta] of this.constructor.relationships) {
       var owner = Ember.getOwner(this);
-      relationshipKey = relationships[i];
-      relationshipMeta = this.constructor.metaForProperty(relationshipKey);
+      // relationshipKey = relationships[i];
+      // relationshipMeta = this.constructor.metaForProperty(relationshipKey);
 
       if (relationshipMeta.options.embedded) {
         relationshipType = relationshipMeta.type;
@@ -148,6 +154,7 @@ Ember.Model = Ember.Object.extend(Ember.Evented, {
     this._createReference();
     this.trigger('didLoad');
   },
+
 
   didDefineProperty: function(proto, key, value) {
     if (isDescriptor(value) && value.meta) {
@@ -185,41 +192,32 @@ Ember.Model = Ember.Object.extend(Ember.Evented, {
   },
 
   toJSON: function() {
-    var key, meta,
-        json = {},
-        attributes = this.constructor.getAttributes(),
-        relationships = this.constructor.getRelationships(),
-        properties = attributes ? this.getProperties(attributes) : {},
-        rootKey = get(this.constructor, 'rootKey');
+    var json = {};
+    var rootKey = get(this.constructor, 'rootKey');
 
-    for (key in properties) {
-      meta = this.constructor.metaForProperty(key);
+    // Using ES5 getters feature here `this[key]` instead of
+    // this.get(key)
+    for (let [key, meta] of this.constructor.attributes) {
       if (meta.type && meta.type.serialize) {
-        json[this.dataKey(key)] = meta.type.serialize(properties[key]);
+        json[this.dataKey(key)] = meta.type.serialize(this[key]);
       } else if (meta.type && Ember.Model.dataTypes[meta.type]) {
-        json[this.dataKey(key)] = Ember.Model.dataTypes[meta.type].serialize(properties[key]);
+        json[this.dataKey(key)] = Ember.Model.dataTypes[meta.type].serialize(this[key]);
       } else {
-        json[this.dataKey(key)] = properties[key];
+        json[this.dataKey(key)] = this[key];
       }
     }
 
-    if (relationships) {
-      var data, relationshipKey;
+    for (let [key, meta] of this.constructor.relationships) {
+      let data;
 
-      for(var i = 0; i < relationships.length; i++) {
-        key = relationships[i];
-        meta = this.constructor.metaForProperty(key);
-        relationshipKey = meta.options.key || key;
-
-        if (meta.kind === 'belongsTo') {
-          data = this.serializeBelongsTo(key, meta);
-        } else {
-          data = this.serializeHasMany(key, meta);
-        }
-
-        json[relationshipKey] = data;
-
+      if (meta.kind === 'belongsTo') {
+        data = this.serializeBelongsTo(key, meta);
+      } else {
+        data = this.serializeHasMany(key, meta);
       }
+
+      json[key] = data;
+
     }
 
     if (rootKey) {
@@ -454,24 +452,6 @@ Ember.Model.reopenClass({
   adapter: Ember.Adapter.create(),
 
   _clientIdCounter: 1,
-
-  getAttributes: function() {
-    this.proto(); // force class "compilation" if it hasn't been done.
-    var attributes = this._attributes || [];
-    if (typeof this.superclass.getAttributes === 'function') {
-      attributes = this.superclass.getAttributes().concat(attributes);
-    }
-    return attributes;
-  },
-
-  getRelationships: function() {
-    this.proto(); // force class "compilation" if it hasn't been done.
-    var relationships = this._relationships || [];
-    if (typeof this.superclass.getRelationships === 'function') {
-      relationships = this.superclass.getRelationships().concat(relationships);
-    }
-    return relationships;
-  },
 
   fetch: function(id) {
     var owner = Ember.getOwner(this);
@@ -753,6 +733,42 @@ Ember.Model.reopenClass({
     }
     return record;
   },
+
+  attributes: Ember.computed(function() {
+    let map = new Map();
+
+    this.eachComputedProperty((name, meta) => {
+      if (meta.isAttribute) {
+        // assert(
+        //   "You may not set `id` as an attribute on your model. Please remove any lines that look like: `id: DS.attr('<type>')` from " +
+        //     this.toString(),
+        //   name !== 'id'
+        // );
+
+        meta.name = name;
+        map.set(name, meta);
+      }
+    });
+    return map;
+  }).readOnly(),
+
+  relationships: Ember.computed(function() {
+    let map = new Map();
+
+    this.eachComputedProperty((name, meta) => {
+      if (meta.isRelationship) {
+        // assert(
+        //   "You may not set `id` as an attribute on your model. Please remove any lines that look like: `id: DS.attr('<type>')` from " +
+        //     this.toString(),
+        //   name !== 'id'
+        // );
+
+        meta.name = name;
+        map.set(name, meta);
+      }
+    });
+    return map;
+  }).readOnly(),
 
 
   addToRecordArrays: function(record) {
