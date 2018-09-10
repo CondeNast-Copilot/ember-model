@@ -126,14 +126,11 @@ Ember.Model = Ember.Object.extend(Ember.Evented, {
     // eagerly load embedded data
     for (let [relationshipKey, relationshipMeta] of this.constructor.relationships) {
       var owner = Ember.getOwner(this);
-      // relationshipKey = relationships[i];
-      // relationshipMeta = this.constructor.metaForProperty(relationshipKey);
       var relationshipType;
 
       if (relationshipMeta.options.embedded) {
         relationshipType = relationshipMeta.type;
         if (typeof relationshipType === "string") {
-          // relationshipType = Ember.get(Ember.lookup, relationshipType) || owner.factoryFor('model:'+ relationshipType).class;
           relationshipType = owner.factoryFor('model:'+ relationshipType).class;
         }
 
@@ -734,12 +731,6 @@ Ember.Model.reopenClass({
 
     this.eachComputedProperty((name, meta) => {
       if (meta.isAttribute) {
-        // assert(
-        //   "You may not set `id` as an attribute on your model. Please remove any lines that look like: `id: DS.attr('<type>')` from " +
-        //     this.toString(),
-        //   name !== 'id'
-        // );
-
         meta.name = name;
         map.set(name, meta);
       }
@@ -752,12 +743,6 @@ Ember.Model.reopenClass({
 
     this.eachComputedProperty((name, meta) => {
       if (meta.isRelationship) {
-        // assert(
-        //   "You may not set `id` as an attribute on your model. Please remove any lines that look like: `id: DS.attr('<type>')` from " +
-        //     this.toString(),
-        //   name !== 'id'
-        // );
-
         meta.name = name;
         map.set(name, meta);
       }
