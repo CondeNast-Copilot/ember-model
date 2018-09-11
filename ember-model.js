@@ -609,8 +609,6 @@ function isDescriptor(value) {
   return value && typeof value === 'object' && value.isDescriptor;
 }
 
-// Ember.run.queues.push('data');
-
 Ember.Model = Ember.Object.extend(Ember.Evented, {
   isLoaded: true,
   isLoading: Ember.computed.not('isLoaded'),
@@ -689,60 +687,25 @@ Ember.Model = Ember.Object.extend(Ember.Evented, {
     return get(this, get(this.constructor, 'primaryKey'));
   },
 
-  // load: function(id, hash) {
-  //   var data = {};
-  //   data[get(this.constructor, 'primaryKey')] = id;
-  //   // data = Object.assign({}, data, hash);
-  //   // set(this, '_data', data);
-  //   set(this, '_data', Ember.merge(data, hash));
-  //   this.getWithDefault('_dirtyAttributes', []).clear();
-
-
-  //   // eagerly load embedded data
-  //   for (let [relationshipKey, relationshipMeta] of this.constructor.relationships) {
-  //     var owner = Ember.getOwner(this);
-
-  //     if (relationshipMeta.options.embedded) {
-  //       var relationshipType = relationshipMeta.type;
-  //       if (typeof relationshipType === "string") {
-  //         relationshipType = owner.factoryFor('model:'+ relationshipType).class;
-  //       }
-
-  //       var relationshipData = data[relationshipKey];
-  //       if (relationshipData) {
-  //         relationshipType.load(relationshipData, owner);
-  //       }
-  //     }
-  //   }
-
-  //   set(this, 'isNew', false);
-  //   set(this, 'isLoaded', true);
-  //   this._createReference();
-  //   this.trigger('didLoad');
-  // },
-
   load: function(id, hash) {
     var data = {};
     data[get(this.constructor, 'primaryKey')] = id;
-    set(this, '_data', Ember.merge(data, hash));
+    data = Object.assign({}, data, hash);
+    set(this, '_data', data);
     this.getWithDefault('_dirtyAttributes', []).clear();
-    //this._reloadHasManys();
 
 
     // eagerly load embedded data
-    var relationships = Array.from(this.constructor.relationships.keys()) || [], meta = Ember.meta(this), relationshipKey, relationship, relationshipMeta, relationshipData, relationshipType;
-    for (var i = 0, l = relationships.length; i < l; i++) {
+    for (let [relationshipKey, relationshipMeta] of this.constructor.relationships) {
       var owner = Ember.getOwner(this);
-      relationshipKey = relationships[i];
-      relationshipMeta = this.constructor.metaForProperty(relationshipKey);
 
       if (relationshipMeta.options.embedded) {
-        relationshipType = relationshipMeta.type;
+        var relationshipType = relationshipMeta.type;
         if (typeof relationshipType === "string") {
-          relationshipType = Ember.get(Ember.lookup, relationshipType) || owner.factoryFor('model:'+ relationshipType).class;
+          relationshipType = owner.factoryFor('model:'+ relationshipType).class;
         }
 
-        relationshipData = data[relationshipKey];
+        var relationshipData = data[relationshipKey];
         if (relationshipData) {
           relationshipType.load(relationshipData, owner);
         }
