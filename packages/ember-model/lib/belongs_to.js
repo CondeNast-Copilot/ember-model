@@ -11,8 +11,7 @@ function storeFor(record) {
   return null;
 }
 
-function getType(record) {
-  var type = this.type;
+function getType(record, type) {
 
   if (typeof this.type === "string" && this.type) {
     type = Ember.get(Ember.lookup, this.type);
@@ -34,8 +33,8 @@ Ember.belongsTo = function(type, options) {
 
   return Ember.computed("_data", {
     get: function(propertyKey){
-      type = meta.getType(this);
-      Ember.assert("Type cannot be empty.", !Ember.isEmpty(type));
+      var innerType = meta.getType(this, type);
+      Ember.assert("Type cannot be empty.", !Ember.isEmpty(innerType));
 
       var key = options.key || propertyKey,
           self = this;
@@ -49,7 +48,7 @@ Ember.belongsTo = function(type, options) {
       };
 
       var store = storeFor(this),
-          value = this.getBelongsTo(key, type, meta, store);
+          value = this.getBelongsTo(key, innerType, meta, store);
       this._registerBelongsTo(meta);
       if (value !== null && meta.options.embedded) {
         value.get('isDirty'); // getter must be called before adding observer
@@ -59,8 +58,8 @@ Ember.belongsTo = function(type, options) {
     },
 
     set: function(propertyKey, value, oldValue){
-      type = meta.getType(this);
-      Ember.assert("Type cannot be empty.", !Ember.isEmpty(type));
+      var innerType = meta.getType(this, type);
+      Ember.assert("Type cannot be empty.", !Ember.isEmpty(innerType));
 
       var dirtyAttributes = get(this, '_dirtyAttributes'),
           createdDirtyAttributes = false,
@@ -80,8 +79,8 @@ Ember.belongsTo = function(type, options) {
       }
 
       if (value) {
-        Ember.assert(`Attempted to set property of type: ${value.constructor} with a value of type: ${type}`,
-                    value instanceof type);
+        Ember.assert(`Attempted to set property of type: ${value.constructor} with a value of type: ${innerType}`,
+                    value instanceof innerType);
       }
 
       if (oldValue !== value) {

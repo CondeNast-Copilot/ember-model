@@ -62,12 +62,15 @@ test("loading embedded data into a parent updates the child records", function()
 
   var Post = Ember.Model.extend({
     id: attr(),
-    comments: Ember.hasMany(Comment, {key: 'comments', embedded: true})
+    comments: Ember.hasMany('comment', {key: 'comments', embedded: true})
   });
 
   var owner = buildOwner();
   Ember.setOwner(Comment, owner);
   Ember.setOwner(Post, owner);
+  owner.register('model:comment', Comment);
+  owner.register('model:post', Post);
+  owner.register('service:store', Ember.Model.Store);
 
   Post.adapter = {
     find: function(record, id) {
@@ -94,12 +97,15 @@ test("loading embedded data into a parent with deleted children deletes the chil
 
   var Post = Ember.Model.extend({
     id: attr(),
-    comments: Ember.hasMany(Comment, {key: 'comments', embedded: true})
+    comments: Ember.hasMany('comment', {key: 'comments', embedded: true})
   });
 
   var owner = buildOwner();
   Ember.setOwner(Comment, owner);
   Ember.setOwner(Post, owner);
+  owner.register('model:comment', Comment);
+  owner.register('model:post', Post);
+  owner.register('service:store', Ember.Model.Store);
 
   Post.adapter = {
     find: function(record, id) {

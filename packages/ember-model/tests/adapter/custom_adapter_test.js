@@ -4,9 +4,15 @@ var owner;
 module("Ember.CustomAdapter", {
   setup: function() {
     owner = buildOwner();
-    Ember.CustomAdapter = Ember.Adapter.extend();
+    Ember.CustomAdapter = Ember.Adapter.extend({
+    });
+    Ember.CustomAdapter.reopenClass({
+      toString() {
+        return 'Ember.CustomAdapter';
+      }
+    });
     CustomModel = Ember.Model.extend({
-      name: Ember.attr()
+      name: Ember.attr(),
     });
     Ember.setOwner(CustomModel, owner);
     CustomModel.adapter = Ember.CustomAdapter.create();

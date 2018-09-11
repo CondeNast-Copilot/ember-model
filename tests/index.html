@@ -1,33 +1,77 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Dummy Tests</title>
-    <meta name="description" content="">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+<head>
+  <meta charset="utf-8">
+  <title>QUnit basic example</title>
+  <link rel="stylesheet" href="../bower_components/qunit/qunit/qunit.css">
+</head>
+<body>
+  <div id="qunit"></div>
+  <div id="qunit-fixture"></div>
+  <script type="text/javascript" src="../bower_components/jquery/dist/jquery.js"></script>
+  <script type="text/javascript" src="../bower_components/handlebars/handlebars.js"></script>
+  <script type="text/javascript" src="../node_modules/ember-source/dist/ember.debug.js"></script>
 
-    {{content-for "head"}}
-    {{content-for "test-head"}}
+  <script type="text/javascript" src="../bower_components/qunit/qunit/qunit.js"></script>
 
-    <link rel="stylesheet" href="{{rootURL}}assets/vendor.css">
-    <link rel="stylesheet" href="{{rootURL}}assets/dummy.css">
-    <link rel="stylesheet" href="{{rootURL}}assets/test-support.css">
+  <script type="text/javascript" src="expect_assertion_helper.js"></script>
 
-    {{content-for "head-footer"}}
-    {{content-for "test-head-footer"}}
-  </head>
-  <body>
-    {{content-for "body"}}
-    {{content-for "test-body"}}
+  <script type="text/javascript">
+    TESTING = true;
+    // FIXME: Logging rejected promises
+    Ember.Logger.error = Ember.K;
+  </script>
 
-    <script src="/testem.js" integrity=""></script>
-    <script src="{{rootURL}}assets/vendor.js"></script>
-    <script src="{{rootURL}}assets/test-support.js"></script>
-    <script src="{{rootURL}}assets/dummy.js"></script>
-    <script src="{{rootURL}}assets/tests.js"></script>
+  <script src="../dist/ember-model.js"></script>
 
-    {{content-for "body-footer"}}
-    {{content-for "test-body-footer"}}
-  </body>
+  
+  <script type="text/javascript" src="../packages/ember-model/tests/adapter/custom_adapter_test.js"></script>
+  
+  <script type="text/javascript" src="../packages/ember-model/tests/adapter/find_all_test.js"></script>
+  
+  <script type="text/javascript" src="../packages/ember-model/tests/adapter/find_many_test.js"></script>
+  
+  <script type="text/javascript" src="../packages/ember-model/tests/adapter/find_query_test.js"></script>
+  
+  <script type="text/javascript" src="../packages/ember-model/tests/adapter/fixture_adapter_test.js"></script>
+  
+  <script type="text/javascript" src="../packages/ember-model/tests/adapter/rest_adapter_test.js"></script>
+  
+  <script type="text/javascript" src="../packages/ember-model/tests/attr_test.js"></script>
+  
+  <script type="text/javascript" src="../packages/ember-model/tests/belongs_to_test.js"></script>
+  
+  <script type="text/javascript" src="../packages/ember-model/tests/dirty_tracking_test.js"></script>
+  
+  <script type="text/javascript" src="../packages/ember-model/tests/filtered_record_array_test.js"></script>
+  
+  <script type="text/javascript" src="../packages/ember-model/tests/has_many_array_test.js"></script>
+  
+  <script type="text/javascript" src="../packages/ember-model/tests/has_many_test.js"></script>
+  
+  <script type="text/javascript" src="../packages/ember-model/tests/has_many/embedded_manipulation_test.js"></script>
+  
+  <script type="text/javascript" src="../packages/ember-model/tests/has_many/embedded_objects_load_test.js"></script>
+  
+  <script type="text/javascript" src="../packages/ember-model/tests/has_many/embedded_objects_save_test.js"></script>
+  
+  <script type="text/javascript" src="../packages/ember-model/tests/has_many/embedded_polymorphic_test.js"></script>
+  
+  <script type="text/javascript" src="../packages/ember-model/tests/has_many/manipulation_test.js"></script>
+  
+  <script type="text/javascript" src="../packages/ember-model/tests/has_many/nonembedded_objects_save_test.js"></script>
+  
+  <script type="text/javascript" src="../packages/ember-model/tests/has_many/objects_load_test.js"></script>
+  
+  <script type="text/javascript" src="../packages/ember-model/tests/model_sideloading_test.js"></script>
+  
+  <script type="text/javascript" src="../packages/ember-model/tests/model_test.js"></script>
+  
+  <script type="text/javascript" src="../packages/ember-model/tests/record_array_test.js"></script>
+  
+  <script type="text/javascript" src="../packages/ember-model/tests/store_test.js"></script>
+  
+
+  </script>
+</body>
 </html>

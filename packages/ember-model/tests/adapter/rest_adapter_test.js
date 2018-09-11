@@ -432,6 +432,7 @@ test("createRecord", function() {
   expect(5);
 
   var record = RESTModel.create({name: "Erik"});
+  Ember.setOwner(record, Ember.getOwner(RESTModel));
   // ok(record.get('isDirty'), "Record should be dirty");
   ok(record.get('isNew'), "Record should be new");
 
@@ -453,6 +454,7 @@ test("createRecord calls didCreateRecord", function() {
   var record = RESTModel.create({name: "Erik"}),
     args, context, didCreateRecord = adapter.didCreateRecord,
     data = {post: {id: 1, name: "Erik"}};
+  Ember.setOwner(record, Ember.getOwner(RESTModel));
 
   // ok(record.get('isDirty'), "Record should be dirty");
   ok(record.get('isNew'), "Record should be new");
@@ -485,6 +487,8 @@ test("createRecord record loads data in response", function() {
     return ajaxSuccess(data);
   };
 
+  Ember.setOwner(record, Ember.getOwner(RESTModel));
+
   Ember.run(record, record.save);
 
   equal(record.get('id'), 1, 'resolved record should have id');
@@ -495,6 +499,7 @@ test("saveRecord", function() {
   expect(5);
 
   var record = Ember.run(RESTModel, RESTModel.create, {id: 1, name: "Erik", isNew: false});
+  Ember.setOwner(record, Ember.getOwner(RESTModel));
 
   record.set('name', "Kris");
   ok(record.get('isDirty'), "Record should be dirty");
@@ -516,6 +521,8 @@ test("saveRecord calls didSaveRecord after saving record", function() {
 
   var record = Ember.run(RESTModel, RESTModel.create, {id: 1, name: "Erik", isNew: false}),
     data = {id: 1, name: "Erik"}, args, didSaveRecord = adapter.didSaveRecord, context;
+
+  Ember.setOwner(record, Ember.getOwner(RESTModel));
 
   record.set('name', "Kris");
   ok(record.get('isDirty'), "Record should be dirty");
@@ -544,6 +551,8 @@ test("saveRecord loads response data if it exists", function() {
   var record = Ember.run(RESTModel, RESTModel.create, {id: 1, name: "Erik", isNew: false}),
     responseData = {post: {id: 1, name: "Bill"}};
 
+  Ember.setOwner(record, Ember.getOwner(RESTModel));
+
   record.set('name', 'John');
   ok(record.get('isDirty'), 'Record should be dirty');
 
@@ -562,6 +571,8 @@ test("saveRecord does not load empty response", function() {
   expect(4);
   var record = Ember.run(RESTModel, RESTModel.create, {id: 1, name: "Erik", isNew: false}),
     responseData = '';
+
+  Ember.setOwner(record, Ember.getOwner(RESTModel));
 
   record.set('name', 'John');
   ok(record.get('isDirty'), 'Record should be dirty');
@@ -582,6 +593,8 @@ test("saveRecord does not load HEAD response (undefined response body)", functio
   var record = Ember.run(RESTModel, RESTModel.create, {id: 1, name: "Erik", isNew: false}),
     responseData = '';
 
+  Ember.setOwner(record, Ember.getOwner(RESTModel));
+
   record.set('name', 'John');
   ok(record.get('isDirty'), 'Record should be dirty');
 
@@ -600,6 +613,8 @@ test("saveRecord does not load response if root key is missing", function() {
   expect(4);
   var record = Ember.run(RESTModel, RESTModel.create, {id: 1, name: "Erik", isNew: false}),
     responseData = {notRootKey: true};
+
+  Ember.setOwner(record, Ember.getOwner(RESTModel));
 
   record.set('name', 'John');
   ok(record.get('isDirty'), 'Record should be dirty');

@@ -37,7 +37,7 @@ test("must be created with a filterFunction property", function() {
 
 test("must be created with a filterProperties property", function() {
   throws(function() {
-    Ember.FilteredRecordArray.create({modelClass: Model, filterFunction: Ember.K});
+    Ember.FilteredRecordArray.create({modelClass: Model, filterFunction: () => true});
   }, /FilteredRecordArrays must be created with filterProperties/);
 });
 
@@ -50,7 +50,7 @@ test("with a noop filter will return all the loaded records", function() {
 
     var recordArray = Ember.FilteredRecordArray.create({
       modelClass: Model,
-      filterFunction: Ember.K,
+      filterFunction: () => true,
       filterProperties: []
     });
 
@@ -94,7 +94,7 @@ test("loading a record that doesn't match the filter after creating a FilteredRe
       filterProperties: ['name']
     });
 
-    Model.create({id: 3, name: 'Kris'}).save().then(function(record) {
+    Model.create(owner.ownerInjection(), {id: 3, name: 'Kris'}).save().then(function(record) {
       start();
       equal(recordArray.get('length'), 1, "There is still 1 record");
       equal(recordArray.get('firstObject.name'), 'Erik', "The record data matches");
@@ -118,7 +118,7 @@ test("loading a record that matches the filter after creating a FilteredRecordAr
       filterProperties: ['name']
     });
 
-    Model.create({id: 3, name: 'Kris'}).save().then(function(record) {
+    Model.create(owner.ownerInjection(), {id: 3, name: 'Kris'}).save().then(function(record) {
       start();
       equal(recordArray.get('length'), 2, "There are 2 records");
       equal(recordArray.get('firstObject.name'), 'Erik', "The record data matches");
@@ -175,7 +175,7 @@ test("adding a new record and changing a property that matches the filter should
     equal(recordArray.get('length'), 1, "There is 1 record initially");
     equal(recordArray.get('firstObject.name'), 'Erik', "The record data matches");
 
-    Model.create({id: 3, name: 'Kris'}).save().then(function(record) {
+    Model.create(owner.ownerInjection(), {id: 3, name: 'Kris'}).save().then(function(record) {
       start();
       record.set('name', 'Ekris');
 

@@ -23,7 +23,7 @@ Ember.hasMany = function(type, options) {
 
   var meta = { type: type, isRelationship: true, options: options, kind: 'hasMany', getType: getType};
 
-  return Ember.computed({
+  return Ember.Model.computed({
     get: function(propertyKey) {
       type = meta.getType(this);
       Ember.assert("Type cannot be empty", !Ember.isEmpty(type));

@@ -243,22 +243,19 @@ Ember.EmbeddedHasManyArray = Ember.ManyArray.extend({
     var content = get(this, 'content');
     var reference = content.objectAt(idx);
     var attrs = reference.data;
-    var isPolymorphic = get(this, 'polymorphic');
-    var modelClass = get(this, 'modelClass');
-    var Factory;
-    var primaryKey;
-    var type;
-    var store;
 
     var record;
     if (reference.record) {
       record = reference.record;
       Ember.setOwner(record, owner);
     } else {
+      var Factory;
+      var isPolymorphic = get(this, 'polymorphic');
+      var modelClass = get(this, 'modelClass');
       if (isPolymorphic) {
         Ember.assert('The class ' + modelClass.toString() + ' is missing the polymorphicType implementation.', modelClass.polymorphicType);
-        store = owner.lookup('service:store');
-        type =  modelClass.polymorphicType(attrs);
+        var store = owner.lookup('service:store');
+        var type =  modelClass.polymorphicType(attrs);
         modelClass = store.modelFor(type);
         Factory = store.modelFactoryFor(type);
         if (!modelClass.adapter.serializer) {
@@ -268,7 +265,7 @@ Ember.EmbeddedHasManyArray = Ember.ManyArray.extend({
       record = (Factory || modelClass).create(owner.ownerInjection(), { _reference: reference });
       reference.record = record;
       if (attrs) {
-        primaryKey = get(modelClass, 'primaryKey');
+        var primaryKey = get(modelClass, 'primaryKey');
         record.load(attrs[primaryKey], attrs);
       }
     }
