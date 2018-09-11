@@ -699,7 +699,7 @@ Ember.Model = Ember.Object.extend(Ember.Evented, {
     for (let [relationshipKey, relationshipMeta] of this.constructor.relationships) {
       var owner = Ember.getOwner(this);
 
-      if (relationshipMeta.options.embedded) {
+      if (relationshipMeta.options.embedded && ! relationshipMeta.options.polymorphic) {
         var relationshipType = relationshipMeta.type;
         if (typeof relationshipType === "string") {
           relationshipType = owner.factoryFor('model:'+ relationshipType).class;
