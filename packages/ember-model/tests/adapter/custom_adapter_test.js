@@ -4,8 +4,7 @@ var owner;
 module("Ember.CustomAdapter", {
   setup: function() {
     owner = buildOwner();
-    Ember.CustomAdapter = Ember.Adapter.extend({
-    });
+    Ember.CustomAdapter = Ember.Adapter.extend();
     Ember.CustomAdapter.reopenClass({
       toString() {
         return 'Ember.CustomAdapter';
