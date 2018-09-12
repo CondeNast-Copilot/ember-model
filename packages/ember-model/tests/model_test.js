@@ -116,7 +116,10 @@ test("can handle models with ID of zero", function() {
       name: Ember.attr()
   });
 
-  var owner = buildOwner();
+  ModelWithZeroID.reopenClass({
+    primaryKey: 'id'
+  });
+
   Ember.setOwner(ModelWithZeroID, owner);
 
   ModelWithZeroID.adapter = Ember.FixtureAdapter.create();
@@ -300,7 +303,7 @@ test(".clearCache destroys sideloadedData and record references", function() {
 test("new records are added to the identity map", function() {
   expect(2);
 
-  var record = Model.create({token: 2, name: 'Yehuda'});
+  var record = Model.create(owner.ownerInjection(), {token: 2, name: 'Yehuda'});
 
   record.save();
   stop();
@@ -317,7 +320,7 @@ test("creating a new record adds it to existing record arrays", function() {
   expect(1);
 
   var records = Model.find();
-  var record = Model.create({token: 'b', name: 'Yehuda'});
+  var record = Model.create(owner.ownerInjection(), {token: 'b', name: 'Yehuda'});
   record.save();
   stop();
 
@@ -348,7 +351,7 @@ test("destroying a record removes it from record arrays", function() {
 test("record isNew & isSaving flags", function() {
   expect(5);
 
-  var record = Model.create();
+  var record = Model.create(owner.ownerInjection());
   ok(record.get('isNew'));
 
   record.save();
@@ -485,7 +488,7 @@ test("Model#save() works as expected", function() {
 test("Model#create() works as expected", function() {
   expect(10);
 
-  var record = Model.create({name: 'Yehuda'});
+  var record = Model.create(owner.ownerInjection(), {name: 'Yehuda'});
 
   ok(record.get('isNew'), "record isNew upon instantiation");
   ok(record.get('isLoaded'), "record isLoaded upon instantiation");
@@ -506,7 +509,7 @@ test("Model#create() works as expected", function() {
   stop();
 });
 
-test(".getAttributes() returns the model's attributes", function() {
+test(".attributes returns the model's attributes", function() {
   var attr = Ember.attr,
       BaseModel = Ember.Model.extend({
         id: attr()
@@ -528,13 +531,13 @@ test(".getAttributes() returns the model's attributes", function() {
         species: attr()
       });
 
-  deepEqual(Employee.getAttributes(), ['id', 'name', 'nationality', 'employeeId']);
-  deepEqual(Person.getAttributes(), ['id', 'name', 'nationality']);
-  deepEqual(Animal.getAttributes(), ['id', 'order', 'family', 'genus', 'species']);
-  deepEqual(BaseModel.getAttributes(), ['id']);
+  deepEqual(Array.from(Employee.attributes.keys()).sort(), ['id', 'name', 'nationality', 'employeeId'].sort());
+  deepEqual(Array.from(Person.attributes.keys()).sort(), ['id', 'name', 'nationality'].sort());
+  deepEqual(Array.from(Animal.attributes.keys()).sort(), ['id', 'order', 'family', 'genus', 'species'].sort());
+  deepEqual(Array.from(BaseModel.attributes.keys()), ['id']);
 });
 
-test(".getRelationships() returns the model's relationships", function() {
+test(".relationships returns the model's relationships", function() {
   var Comment = Ember.Model.extend(),
       Rating = Ember.Model.extend(),
       Author = Ember.Model.extend(),
@@ -553,9 +556,9 @@ test(".getRelationships() returns the model's relationships", function() {
         source: Ember.belongsTo(Site, { key: 'site' })
       });
 
-  deepEqual(Commentable.getRelationships(), ['comments']);
-  deepEqual(Article.getRelationships(), ['comments', 'author', 'ratings']);
-  deepEqual(News.getRelationships(), ['comments', 'author', 'ratings', 'source']);
+  deepEqual(Array.from(Commentable.relationships.keys()).sort(), ['comments'].sort());
+  deepEqual(Array.from(Article.relationships.keys()).sort(), ['comments', 'author', 'ratings'].sort());
+  deepEqual(Array.from(News.relationships.keys()).sort(), ['comments', 'author', 'ratings', 'source'].sort());
 });
 
 test("toJSON includes embedded relationships", function() {
@@ -615,8 +618,8 @@ test("toJSON includes non-embedded relationships", function() {
         id: 1,
         title: Ember.attr(),
         type: 'test',
-        comments: Ember.hasMany(Comment, { key: 'comments' }),
-        author: Ember.belongsTo(Author, { key: 'author' })
+        comments: Ember.hasMany('comment', { key: 'comments' }),
+        author: Ember.belongsTo('author', { key: 'author' })
       });
 
   var articleData = {
@@ -631,9 +634,9 @@ test("toJSON includes non-embedded relationships", function() {
   Ember.setOwner(Comment, owner);
   Ember.setOwner(Author, owner);
   Ember.setOwner(Article, owner);
-  owner.register('model:test', Comment);
-  owner.register('model:test', Author);
-  owner.register('model:test', Article);
+  owner.register('model:comment', Comment);
+  owner.register('model:author', Author);
+  owner.register('model:article', Article);
   owner.register('service:store', Ember.Model.Store);
 
   Author.adapter = Ember.FixtureAdapter.create();
@@ -648,6 +651,7 @@ test("toJSON includes non-embedded relationships", function() {
 
 
   var article = Article.create();
+  Ember.setOwner(article, owner);
   Ember.run(article, article.load, articleData.id, articleData);
 
   var json = Ember.run(article, article.toJSON);

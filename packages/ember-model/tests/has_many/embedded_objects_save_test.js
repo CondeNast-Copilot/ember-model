@@ -97,11 +97,12 @@ test("new records should remain after parent is saved", function() {
     });
   };
 
-  var article = Article.create({
+  var owner = buildOwner();
+  var article = Article.create(owner.ownerInjection(), {
     title: 'foo'
   });
 
-  var comment = Comment.create({
+  var comment = Comment.create(owner.ownerInjection(), {
     text: 'comment text'
   });
   article.get('comments').addObject(comment);

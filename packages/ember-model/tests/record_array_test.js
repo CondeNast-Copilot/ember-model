@@ -19,7 +19,7 @@ module("Ember.RecordArray", {
       {id: 2, name: 'Stefan'},
       {id: 3, name: 'Kris'}
     ];
-    owner = buildOwner(); 
+    owner = buildOwner();
     store = Ember.Model.Store.create();
     Ember.setOwner(store, owner);
     Ember.setOwner(Model, owner);
@@ -185,6 +185,7 @@ test("RecordArray handles already inserted new models being saved", function() {
   equal(records.get('length'), 1);
 
   var newModel = RESTModel.create();
+  Ember.setOwner(newModel, Ember.getOwner(RESTModel));
 
   records.pushObject(newModel);
 

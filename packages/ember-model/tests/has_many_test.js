@@ -98,19 +98,22 @@ test("notifyPropertyChange does not alter members", function() {
 
 test("model can be specified with a string instead of a class", function() {
   var Article = Ember.Model.extend({
-      comments: Ember.hasMany('Ember.CommentModel', { key: 'comments', embedded: true })
+      comments: Ember.hasMany('comment', { key: 'comments', embedded: true })
       }),
-      Comment = Ember.CommentModel = Ember.Model.extend({
+      Comment = Ember.Model.extend({
         token: Ember.attr(String)
       });
 
   var owner = buildOwner();
   Ember.setOwner(Comment, owner);
   Ember.setOwner(Article, owner);
+  owner.register('model:article', Article);
+  owner.register('model:comment', Comment);
+  owner.register('service:store', Ember.Model.Store);
 
   Comment.primaryKey = 'token';
 
-  var article = Article.create();
+  var article = Article.create(owner.ownerInjection());
   Ember.run(article, article.load, 1, {comments: Ember.A([{token: 'a'}, {token: 'b'}])});
 
   equal(article.get('comments.length'), 2);
@@ -240,25 +243,30 @@ test("has many records created are available from reference cache", function() {
   var Company = Ember.Company = Ember.Model.extend({
      id: Ember.attr('string'),
      title: Ember.attr('string'),
-     projects: Ember.hasMany('Ember.Project', {key:'projects', embedded: true})
+     projects: Ember.hasMany('project', {key:'projects', embedded: true})
   }),
     Project = Ember.Project = Ember.Model.extend({
         id: Ember.attr('string'),
         title: Ember.attr('string'),
-        posts: Ember.hasMany('Ember.Post', {key: 'posts', embedded: true}),
-        company: Ember.belongsTo('Ember.Company', {key:'company'})
+        posts: Ember.hasMany('post', {key: 'posts', embedded: true}),
+        company: Ember.belongsTo('company', {key:'company'})
     }),
     Post = Ember.Post = Ember.Model.extend({
         id: Ember.attr('string'),
         title: Ember.attr('string'),
         body: Ember.attr('string'),
-        project: Ember.belongsTo('Ember.Project', {key:'project'})
+        project: Ember.belongsTo('project', {key:'project'})
     });
 
   var owner = buildOwner();
   Ember.setOwner(Company, owner);
   Ember.setOwner(Project, owner);
   Ember.setOwner(Post, owner);
+
+  owner.register('model:company', Company);
+  owner.register('model:project', Project);
+  owner.register('model:post', Post);
+  owner.register('service:store', Ember.Model.Store);
 
   var compJson = {
     id:1,

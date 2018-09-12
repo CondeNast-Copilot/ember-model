@@ -35,6 +35,12 @@ Ember.Adapter = Ember.Object.extend({
   }
 });
 
+Ember.Adapter.reopenClass({
+  toString() {
+    return `Ember.Adapter`;
+  }
+});
+
 
 })();
 
@@ -524,22 +530,19 @@ Ember.EmbeddedHasManyArray = Ember.ManyArray.extend({
     var content = get(this, 'content');
     var reference = content.objectAt(idx);
     var attrs = reference.data;
-    var isPolymorphic = get(this, 'polymorphic');
-    var modelClass = get(this, 'modelClass');
-    var Factory;
-    var primaryKey;
-    var type;
-    var store;
 
     var record;
     if (reference.record) {
       record = reference.record;
       Ember.setOwner(record, owner);
     } else {
+      var Factory;
+      var isPolymorphic = get(this, 'polymorphic');
+      var modelClass = get(this, 'modelClass');
       if (isPolymorphic) {
         Ember.assert('The class ' + modelClass.toString() + ' is missing the polymorphicType implementation.', modelClass.polymorphicType);
-        store = owner.lookup('service:store');
-        type =  modelClass.polymorphicType(attrs);
+        var store = owner.lookup('service:store');
+        var type =  modelClass.polymorphicType(attrs);
         modelClass = store.modelFor(type);
         Factory = store.modelFactoryFor(type);
         if (!modelClass.adapter.serializer) {
@@ -549,7 +552,7 @@ Ember.EmbeddedHasManyArray = Ember.ManyArray.extend({
       record = (Factory || modelClass).create(owner.ownerInjection(), { _reference: reference });
       reference.record = record;
       if (attrs) {
-        primaryKey = get(modelClass, 'primaryKey');
+        var primaryKey = get(modelClass, 'primaryKey');
         record.load(attrs[primaryKey], attrs);
       }
     }
@@ -606,8 +609,6 @@ function isDescriptor(value) {
   return value && typeof value === 'object' && value.isDescriptor;
 }
 
-Ember.run.queues.push('data');
-
 Ember.Model = Ember.Object.extend(Ember.Evented, {
   isLoaded: true,
   isLoading: Ember.computed.not('isLoaded'),
@@ -624,6 +625,10 @@ Ember.Model = Ember.Object.extend(Ember.Evented, {
   */
   getAttr: function(key, value) {
     return value;
+  },
+
+  toStringExtension() {
+    return this.id;
   },
 
   isDirty: function() {
@@ -685,25 +690,22 @@ Ember.Model = Ember.Object.extend(Ember.Evented, {
   load: function(id, hash) {
     var data = {};
     data[get(this.constructor, 'primaryKey')] = id;
-    set(this, '_data', Ember.merge(data, hash));
+    data = Object.assign({}, data, hash);
+    set(this, '_data', data);
     this.getWithDefault('_dirtyAttributes', []).clear();
-    //this._reloadHasManys();
 
 
     // eagerly load embedded data
-    var relationships = this.constructor._relationships || [], meta = Ember.meta(this), relationshipKey, relationship, relationshipMeta, relationshipData, relationshipType;
-    for (var i = 0, l = relationships.length; i < l; i++) {
+    for (let [relationshipKey, relationshipMeta] of this.constructor.relationships) {
       var owner = Ember.getOwner(this);
-      relationshipKey = relationships[i];
-      relationshipMeta = this.constructor.metaForProperty(relationshipKey);
 
-      if (relationshipMeta.options.embedded) {
-        relationshipType = relationshipMeta.type;
+      if (relationshipMeta.options.embedded && ! relationshipMeta.options.polymorphic) {
+        var relationshipType = relationshipMeta.type;
         if (typeof relationshipType === "string") {
-          relationshipType = Ember.get(Ember.lookup, relationshipType) || owner.factoryFor('model:'+ relationshipType).class;
+          relationshipType = owner.factoryFor('model:'+ relationshipType).class;
         }
 
-        relationshipData = data[relationshipKey];
+        var relationshipData = data[relationshipKey];
         if (relationshipData) {
           relationshipType.load(relationshipData, owner);
         }
@@ -715,6 +717,7 @@ Ember.Model = Ember.Object.extend(Ember.Evented, {
     this._createReference();
     this.trigger('didLoad');
   },
+
 
   didDefineProperty: function(proto, key, value) {
     if (isDescriptor(value) && value.meta) {
@@ -746,47 +749,39 @@ Ember.Model = Ember.Object.extend(Ember.Evented, {
       var record = this.get(key);
       return record ? record.toJSON() : null;
     } else {
-      var primaryKey = get(meta.getType(this), 'primaryKey');
+      var primaryKey = get(meta.getType(this, meta.type), 'primaryKey');
       return this.get(key + '.' + primaryKey);
     }
   },
 
   toJSON: function() {
-    var key, meta,
-        json = {},
-        attributes = this.constructor.getAttributes(),
-        relationships = this.constructor.getRelationships(),
-        properties = attributes ? this.getProperties(attributes) : {},
-        rootKey = get(this.constructor, 'rootKey');
+    var json = {};
+    var rootKey = get(this.constructor, 'rootKey');
 
-    for (key in properties) {
-      meta = this.constructor.metaForProperty(key);
+    // Using ES5 getters feature here `this[key]` instead of
+    // this.get(key)
+    for (let [key, meta] of this.constructor.attributes) {
       if (meta.type && meta.type.serialize) {
-        json[this.dataKey(key)] = meta.type.serialize(properties[key]);
+        json[this.dataKey(key)] = meta.type.serialize(this[key]);
       } else if (meta.type && Ember.Model.dataTypes[meta.type]) {
-        json[this.dataKey(key)] = Ember.Model.dataTypes[meta.type].serialize(properties[key]);
+        json[this.dataKey(key)] = Ember.Model.dataTypes[meta.type].serialize(this[key]);
       } else {
-        json[this.dataKey(key)] = properties[key];
+        json[this.dataKey(key)] = this[key];
       }
     }
 
-    if (relationships) {
-      var data, relationshipKey;
+    for (let [key, meta] of this.constructor.relationships) {
+      let data;
+      let relationshipKey = meta.options.key || key;
 
-      for(var i = 0; i < relationships.length; i++) {
-        key = relationships[i];
-        meta = this.constructor.metaForProperty(key);
-        relationshipKey = meta.options.key || key;
-
-        if (meta.kind === 'belongsTo') {
-          data = this.serializeBelongsTo(key, meta);
-        } else {
-          data = this.serializeHasMany(key, meta);
-        }
-
-        json[relationshipKey] = data;
-
+      if (meta.kind === 'belongsTo') {
+        data = this.serializeBelongsTo(key, meta);
+      } else {
+        data = this.serializeHasMany(key, meta);
       }
+
+      json[relationshipKey] = data;
+
     }
 
     if (rootKey) {
@@ -1022,24 +1017,6 @@ Ember.Model.reopenClass({
 
   _clientIdCounter: 1,
 
-  getAttributes: function() {
-    this.proto(); // force class "compilation" if it hasn't been done.
-    var attributes = this._attributes || [];
-    if (typeof this.superclass.getAttributes === 'function') {
-      attributes = this.superclass.getAttributes().concat(attributes);
-    }
-    return attributes;
-  },
-
-  getRelationships: function() {
-    this.proto(); // force class "compilation" if it hasn't been done.
-    var relationships = this._relationships || [];
-    if (typeof this.superclass.getRelationships === 'function') {
-      relationships = this.superclass.getRelationships().concat(relationships);
-    }
-    return relationships;
-  },
-
   fetch: function(id) {
     var owner = Ember.getOwner(this);
     if (!arguments.length) {
@@ -1118,7 +1095,7 @@ Ember.Model.reopenClass({
       this._currentBatchDeferreds.push(deferred);
     }
 
-    Ember.run.scheduleOnce('data', this, this._executeBatch, owner);
+    Ember.run.scheduleOnce('sync', this, this._executeBatch, owner);
 
     return isFetch ? deferred.promise : records;
   },
@@ -1229,7 +1206,7 @@ Ember.Model.reopenClass({
       this._currentBatchDeferreds.push(deferred);
 
       var owner = Ember.getOwner(record);
-      Ember.run.scheduleOnce('data', this, this._executeBatch, owner);
+      Ember.run.scheduleOnce('sync', this, this._executeBatch, owner);
 
       return deferred.promise;
     } else {
@@ -1320,6 +1297,30 @@ Ember.Model.reopenClass({
     }
     return record;
   },
+
+  attributes: Ember.computed(function() {
+    let map = new Map();
+
+    this.eachComputedProperty((name, meta) => {
+      if (meta.isAttribute) {
+        meta.name = name;
+        map.set(name, meta);
+      }
+    });
+    return map;
+  }).readOnly(),
+
+  relationships: Ember.computed(function() {
+    let map = new Map();
+
+    this.eachComputedProperty((name, meta) => {
+      if (meta.isRelationship) {
+        meta.name = name;
+        map.set(name, meta);
+      }
+    });
+    return map;
+  }).readOnly(),
 
 
   addToRecordArrays: function(record) {
@@ -1426,9 +1427,10 @@ Ember.Model.reopenClass({
     if (!this.sideloadedData) { this.sideloadedData = {}; }
 
     for (var i = 0, l = hashes.length; i < l; i++) {
-      var hash = hashes[i],
-          primaryKey = hash[get(this, 'primaryKey')],
-          record = this.getCachedReferenceRecord(primaryKey, owner);
+      var hash = hashes[i];
+      var primaryKey = hash[get(this, 'primaryKey')];
+      var record = this.getCachedReferenceRecord(primaryKey, owner);
+
       if (record) {
         record.load(primaryKey, hash);
       } else {
@@ -1465,6 +1467,10 @@ Ember.Model.reopenClass({
     this._cacheReference(reference);
 
     return reference;
+  },
+
+  toString() {
+    return `Ember.Model`;
   },
 
   _cacheReference: function(reference) {
@@ -1615,8 +1621,7 @@ function storeFor(record) {
   return null;
 }
 
-function getType(record) {
-  var type = this.type;
+function getType(record, type) {
 
   if (typeof this.type === "string" && this.type) {
     type = Ember.get(Ember.lookup, this.type);
@@ -1636,10 +1641,10 @@ Ember.belongsTo = function(type, options) {
 
   var meta = { type: type, isRelationship: true, options: options, kind: 'belongsTo', getType: getType};
 
-  return Ember.Model.computed("_data", {
+  return Ember.computed("_data", {
     get: function(propertyKey){
-      type = meta.getType(this);
-      Ember.assert("Type cannot be empty.", !Ember.isEmpty(type));
+      var innerType = meta.getType(this, type);
+      Ember.assert("Type cannot be empty.", !Ember.isEmpty(innerType));
 
       var key = options.key || propertyKey,
           self = this;
@@ -1653,7 +1658,7 @@ Ember.belongsTo = function(type, options) {
       };
 
       var store = storeFor(this),
-          value = this.getBelongsTo(key, type, meta, store);
+          value = this.getBelongsTo(key, innerType, meta, store);
       this._registerBelongsTo(meta);
       if (value !== null && meta.options.embedded) {
         value.get('isDirty'); // getter must be called before adding observer
@@ -1663,8 +1668,8 @@ Ember.belongsTo = function(type, options) {
     },
 
     set: function(propertyKey, value, oldValue){
-      type = meta.getType(this);
-      Ember.assert("Type cannot be empty.", !Ember.isEmpty(type));
+      var innerType = meta.getType(this, type);
+      Ember.assert("Type cannot be empty.", !Ember.isEmpty(innerType));
 
       var dirtyAttributes = get(this, '_dirtyAttributes'),
           createdDirtyAttributes = false,
@@ -1684,8 +1689,8 @@ Ember.belongsTo = function(type, options) {
       }
 
       if (value) {
-        Ember.assert(`Attempted to set property of type: ${value.constructor} with a value of type: ${type}`,
-                    value instanceof type);
+        Ember.assert(`Attempted to set property of type: ${value.constructor} with a value of type: ${innerType}`,
+                    value instanceof innerType);
       }
 
       if (oldValue !== value) {
@@ -1806,7 +1811,7 @@ function serialize(value, type) {
 }
 
 Ember.attr = function(type, options) {
-  return Ember.Model.computed("_data", {
+  return Ember.computed("_data", {
     get: function(key){
       var data = get(this, '_data'),
           dataKey = this.dataKey(key),
