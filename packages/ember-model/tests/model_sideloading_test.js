@@ -72,7 +72,7 @@ test("sideloading clears sideload and record cache", function() {
     }
   };
 
-  Model.load([{id: 1, name: "Erik", worth: 123456789}]);
+  Model.load([{id: 1, name: "Erik", worth: 123456789}], owner);
 
   var record;
   Ember.run(function() {
@@ -84,7 +84,7 @@ test("sideloading clears sideload and record cache", function() {
   strictEqual(record.get('name'), "Erik", "Record name retained successfully");
   strictEqual(record.get('worth'), 123456789, "Record worth retained successfully");
 
-  Model.load([{id: 1, name: "Erik", worth: 987654321}]);
+  Model.load([{id: 1, name: "Erik", worth: 987654321}], owner);
 
   Ember.run(function() {
     record = Model.find(1);

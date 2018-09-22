@@ -28,7 +28,8 @@ test("pushing record without an id adds a reference to the content", function() 
     {id: 3, text: 'tres'}
   ];
 
-  var article = Article.create();
+  var owner = buildOwner();
+  var article = Article.create(owner.ownerInjection());
   Ember.run(article, article.load, json.id, json);
 
   var comments = article.get('comments');
@@ -71,7 +72,7 @@ test('adding and reverting an existing record to a many array', function () {
     {id: 3, text: 'tres'}
   ];
 
-  var article = Article.create();
+  var article = Article.create(owner.ownerInjection());
   Ember.run(article, article.load, json.id, json);
 
   equal(article.get('comments.length'), 1, 'should have 1 comment');
@@ -115,13 +116,14 @@ test('adding and reverting a new record to a many array', function () {
     {id: 3, text: 'tres'}
   ];
 
-  var article = Article.create();
+  var owner = buildOwner();
+  var article = Article.create(owner.ownerInjection());
   Ember.run(article, article.load, json.id, json);
 
   equal(article.get('comments.length'), 1, 'should have 1 comment');
   equal(article.get('isDirty'), false, 'should not be dirty');
 
-  var newComment = Comment.create({id: 4, text: 'quatro', isNew: true});
+  var newComment = Comment.create(owner.ownerInjection(), {id: 4, text: 'quatro', isNew: true});
   article.get('comments').pushObject(newComment);
 
   equal(article.get('comments.length'), 2, 'should included added comment');
@@ -166,7 +168,7 @@ test("removing a record from the many array", function() {
   Ember.setOwner(Comment, owner);
   Ember.setOwner(Article, owner);
 
-  var article = Article.create();
+  var article = Article.create(owner.ownerInjection());
   Ember.run(article, article.load, json.id, json);
 
   var comments = article.get('comments'),
@@ -211,7 +213,8 @@ test("setting a has many array with empty array", function() {
     {id: 3, text: 'tres'}
   ];
 
-  var article = Article.create();
+  var owner = buildOwner();
+  var article = Article.create(owner.ownerInjection());
   Ember.run(article, article.load, json.id, json);
 
   equal(article.get('comments.length'), 3, "should be 3 comments");
@@ -254,7 +257,7 @@ test("setting a has many array with item array", function() {
     {id: 3, text: 'tres'}
   ];
 
-  var article = Article.create();
+  var article = Article.create(owner.ownerInjection());
   Ember.run(article, article.load, json.id, json);
 
   equal(article.get('comments.length'), 3, "should be 3 comments");
@@ -297,7 +300,7 @@ test("setting a hasMany array with setObjects", function() {
     {id: 3, text: 'tres'}
   ];
 
-  var article = Article.create();
+  var article = Article.create(owner.ownerInjection());
   Ember.run(article, article.load, json.id, json);
 
   equal(article.get('comments.length'), 3, "should be 3 comments");

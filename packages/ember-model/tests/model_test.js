@@ -47,7 +47,7 @@ test("creates reference when creating record", function() {
 test("updates reference and cache when primary key changes", function() {
   expect(7);
 
-  var model = Model.create(),
+  var model = Model.create(owner.ownerInjection()),
       reference = model._reference;
 
   equal(reference.id, undefined, "reference should keep record's id");
@@ -594,7 +594,7 @@ test("toJSON includes embedded relationships", function() {
     author: {id: 1, name: 'drogus'}
   };
 
-  var article = Article.create();
+  var article = Article.create(owner.ownerInjection());
   Ember.run(article, article.load, articleData.id, articleData);
 
   var json = Ember.run(article, article.toJSON);

@@ -1,6 +1,16 @@
 var attr = Ember.attr;
+var RESTModel, adapter, _ajax, store, registry, owner, App;
 
-module("Ember.attr");
+module("Ember.attr", {
+  setup: function() {
+    RESTModel = Ember.Model.extend({
+      name: Ember.attr()
+    });
+    owner = buildOwner();
+    Ember.setOwner(RESTModel, owner);
+    owner.register('service:store', Ember.Model.Store);
+  }
+});
 
 test("getAttr hook is called when attribute is fetched", function() {
   expect(2);
@@ -9,7 +19,7 @@ test("getAttr hook is called when attribute is fetched", function() {
     title: attr()
   });
 
-  var page = Page.create();
+  var page = Page.create(owner.ownerInjection());
 
   page.getAttr = function(key, value) {
     equal(key, 'title', 'getAttr should be called with key as a first argument');
@@ -28,7 +38,7 @@ test("attr should not change null to object", function() {
   var Page = Ember.Model.extend({
     author: attr()
   });
-  var page = Page.create();
+  var page = Page.create(owner.ownerInjection());
 
   Ember.run(function() {
     page.load(1, {author: null});
@@ -52,7 +62,7 @@ test("attr should deserialize when type has a deserialize method", function() {
     time: attr(Time)
   });
 
-  var post = Post.create();
+  var post = Post.create(owner.ownerInjection());
 
   Ember.run(function() {
     post.load(1, {time: "11:39"});
@@ -73,10 +83,7 @@ test("attr should serialize when type has a serialize method", function() {
     time: attr(Time)
   });
 
-  var post;
-  Ember.run(function() {
-    post = Post.create({time: {hour: 10, min: 11}});
-  });
+  var post = Post.create(owner.ownerInjection(), {time: {hour: 10, min: 11}});
 
   var json = post.toJSON();
   equal(json.time, '10:11', "Serialized time should be 10:11");
@@ -95,10 +102,8 @@ test("attr should know how to serialize some built in objects", function() {
     zero_count:     attr(Number)
   });
 
-  var post, date = new Date(Date.UTC(2001,0,1, 10, 15, 33));
-  Ember.run(function() {
-    post = Post.create({date: date, count: '3', null_date: null, null_number: null, zero_count: 0});
-  });
+  var date = new Date(Date.UTC(2001,0,1, 10, 15, 33));
+  var post = Post.create(owner.ownerInjection(), {date: date, count: '3', null_date: null, null_number: null, zero_count: 0});
 
   var json = post.toJSON();
   equal(json.date, '2001-01-01T10:15:33.000Z', "Date should be serialized");
@@ -126,17 +131,15 @@ test("attr should know how to deserialize some built in objects", function() {
     zero_count:     attr(Number)
   });
 
-  var post = Post.create();
+  var post = Post.create(owner.ownerInjection());
 
-  Ember.run(function() {
-    post.load(1, {
-      date:         '2001-01-01T10:15:33Z',
-      count:        '3',
-      zero_count:   '0',
-      date2:        "Mon Jan 01 2001 10:15:33 GMT+0000 (GMT)",
-      null_date:    null,
-      null_number:  null
-    });
+  post.load(1, {
+    date: '2001-01-01T10:15:33Z',
+    count: '3',
+    zero_count: '0',
+    date2: "Mon Jan 01 2001 10:15:33 GMT+0000 (GMT)",
+    null_date: null,
+    null_number: null
   });
 
   var date = new Date(Date.UTC(2001,0,1, 10, 15, 33));
@@ -157,11 +160,9 @@ test("attr should camelize attributes when reading", function() {
   });
   Page.camelizeKeys = true;
 
-  var page = Page.create();
+  var page = Page.create(owner.ownerInjection());
 
-  Ember.run(function() {
-    page.load(1, {some_author: "Alex"});
-  });
+  page.load(1, { some_author: "Alex" });
 
   var someAuthor = page.get('someAuthor');
   equal(someAuthor, "Alex", "author should be set to Alex");
@@ -187,11 +188,9 @@ test("toJSON should respect the key option in attr", function() {
   var Page = Ember.Model.extend({
     author: attr(String, { key: 'Author'})
   });
-  var page = Page.create();
+  var page = Page.create(owner.ownerInjection());
 
-  Ember.run(function() {
-    page.load(1, { Author: "Guilherme" });
-  });
+  page.load(1, { Author: "Guilherme" });
 
   var json = page.toJSON();
   equal(page.get('author'), "Guilherme", "author should be Guilherme");
@@ -220,7 +219,7 @@ test("custom attributes should revert correctly", function () {
   });
 
 
-  var post = Post.create({});
+  var post = Post.create(owner.ownerInjection());
   post.load(1, { time: "10:11" });
 
 
@@ -250,13 +249,11 @@ test("attr should handle default values", function() {
     author: attr(String, { defaultValue: 'anonymous'}),
     chapters: attr(String, { defaultValue: []})
   });
-  var novel = Book.create();
-  var coloringBook = Book.create();
+  var novel = Book.create(owner.ownerInjection());
+  var coloringBook = Book.create(owner.ownerInjection());
 
-  Ember.run(function() {
-    novel.load(1, { author: "Jane" });
-    coloringBook.load(1, { });
-  });
+  novel.load(1, { author: "Jane" });
+  coloringBook.load(1, {});
   novel.get("chapters").push('intro');
 
   equal(novel.get('author'), "Jane", "author should be Jane");
