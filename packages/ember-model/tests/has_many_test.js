@@ -19,7 +19,8 @@ test("is a CP macro", function() {
 
   ok(cp instanceof Ember.ComputedProperty);
 
-  var article = Article.create();
+  var owner = buildOwner();
+  var article = Article.create(owner.ownerInjection());
   Ember.run(article, article.load, 1, {comments: Ember.A([{token: 'a'}, {token: 'b'}])});
   var comments = Ember.run(article, article.get, 'comments');
 
@@ -41,7 +42,8 @@ var Comment = Ember.Model.extend({
 
   ok(cp instanceof Ember.ComputedProperty);
 
-  var article = Article.create();
+  var owner = buildOwner();
+  var article = Article.create(owner.ownerInjection());
   Ember.run(article, article.load, 1, {comments: Ember.A([1, 2])});
   var comments = Ember.run(article, article.get, 'comments');
 
@@ -64,7 +66,7 @@ test("using it in a model definition", function() {
 
   Comment.primaryKey = 'token';
 
-  var article = Article.create();
+  var article = Article.create(owner.ownerInjection());
   Ember.run(article, article.load, 1, {comments: Ember.A([{token: 'a'}, {token: 'b'}])});
 
   equal(article.get('comments.length'), 2);
@@ -176,7 +178,8 @@ test("when fetching an association getHasMany is called", function() {
 
   Comment.primaryKey = 'token';
 
-  var article = Article.create();
+  var owner = buildOwner();
+  var article = Article.create(owner.ownerInjection());
   article.getHasMany = function(key, type, meta) {
     equal(key, 'comments', "key passed to getHasMany should be the same as key in hasMany options");
     equal(type, Comment, "type of the association should be passed to getHasMany");
@@ -209,7 +212,7 @@ test("toJSON uses the given relationship key", function() {
 
   Comment.primaryKey = 'token';
 
-  var article = Article.create();
+  var article = Article.create(owner.ownerInjection());
 
   Ember.run(article, article.load, 1, { comment_ids: Ember.A(['a'] )});
 
@@ -308,8 +311,9 @@ test("relationship type cannot be empty", function() {
 
   Comment.primaryKey = 'token';
 
-  var article = Article.create(),
-     comment = Comment.create();
+  var owner = buildOwner();
+  var article = Article.create(owner.ownerInjection()),
+     comment = Comment.create(owner.ownerInjection());
 
   var comments = [comment];
   Ember.run(article, article.load, 1, {comments: Ember.A([{token: 'a'}, {token: 'b'}])});
@@ -337,7 +341,7 @@ test("key defaults to model's property key", function() {
 
   Comment.adapter = Ember.FixtureAdapter.create();
   Article.adapter = Ember.FixtureAdapter.create();
-  var article = Article.create();
+  var article = Article.create(owner.ownerInjection());
 
   Ember.run(article, article.load, 1, { comments: Ember.A(['a'] )});
 

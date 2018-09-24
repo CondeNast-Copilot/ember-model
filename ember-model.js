@@ -694,15 +694,16 @@ Ember.Model = Ember.Object.extend(Ember.Evented, {
     set(this, '_data', data);
     this.getWithDefault('_dirtyAttributes', []).clear();
 
+    var owner = Ember.getOwner(this);
+    var store = owner.lookup('service:store');
 
     // eagerly load embedded data
     for (let [relationshipKey, relationshipMeta] of this.constructor.relationships) {
-      var owner = Ember.getOwner(this);
 
       if (relationshipMeta.options.embedded && ! relationshipMeta.options.polymorphic) {
         var relationshipType = relationshipMeta.type;
         if (typeof relationshipType === "string") {
-          relationshipType = owner.factoryFor('model:'+ relationshipType).class;
+          relationshipType = store.modelFor(relationshipType);
         }
 
         var relationshipData = data[relationshipKey];

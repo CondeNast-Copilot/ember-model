@@ -813,7 +813,7 @@ test("find() resolves with record", function() {
   expect(1);
 
   var data = {id: 1, name: 'Erik'},
-    record = RESTModel.create();
+    record = RESTModel.create(owner.ownerInjection());
 
   RESTModel.collectionKey = undefined;
   adapter._ajax = function(url, params, method) {
@@ -873,7 +873,7 @@ test("createRecord() resolves with record", function() {
   expect(1);
 
   var data = {id: 1, name: 'Erik'},
-    record = RESTModel.create();
+    record = RESTModel.create(owner.ownerInjection());
 
   RESTModel.rootKey = undefined;
   adapter._ajax = function(url, params, method) {
@@ -890,7 +890,7 @@ test("saveRecord() resolves with record", function() {
   expect(1);
 
   var data = {id: 1, name: 'Erik'},
-    record = RESTModel.create({name: 'Ray'});
+    record = RESTModel.create(owner.ownerInjection(), {name: 'Ray'});
 
   RESTModel.rootKey = undefined;
   adapter._ajax = function(url, params, method) {
@@ -973,7 +973,8 @@ test("didSaveRecord calls normalize", function() {
 
   RESTModel.adapter = adapter;
   RESTModel.rootKey = undefined;
-  var record = Ember.run(RESTModel, RESTModel.create, data);
+  var record = RESTModel.create(owner.ownerInjection(), data);
+
 
   adapter._ajax = function(url, params, method) {
     return ajaxSuccess(data);
@@ -1006,7 +1007,7 @@ test("didCreateRecord calls normalize", function() {
     id: 1,
     name: "Erik"
   };
-  var record = Ember.run(RESTModel, RESTModel.create, data);
+  var record = RESTModel.create(owner.ownerInjection(), data);
 
   adapter._ajax = function(url, params, method) {
     return ajaxSuccess(data);

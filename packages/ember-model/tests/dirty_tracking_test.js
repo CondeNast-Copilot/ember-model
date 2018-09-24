@@ -159,7 +159,8 @@ test("dirty checking works with boolean attributes", function() {
     canSwim: attr(Boolean)
   });
 
-  var obj = Model.create();
+  var owner = buildOwner();
+  var obj = Model.create(owner.ownerInjection());
   Ember.run(function() {
     obj.load(1, {canSwim: true});
   });
@@ -174,7 +175,9 @@ test("dirty checking works with date attributes", function() {
     createdAt: attr(Date)
   });
   var originalDate = new Date(2013, 0, 0);
-  var obj = Model.create();
+
+  var owner = buildOwner();
+  var obj = Model.create(owner.ownerInjection());
   Ember.run(function() {
     obj.load(1, {createdAt: originalDate.toISOString()});
   });
@@ -208,7 +211,8 @@ test("getting embedded belongsTo attribute after load should not make parent dir
 
   Post.adapter = Ember.FixtureAdapter.create();
 
-  var post = Post.create();
+  var owner = buildOwner();
+  var post = Post.create(owner.ownerInjection());
   Ember.run(post, post.load, json.id, json);
   equal(post.get('isDirty'), false, 'loaded record for post is not dirty');
 
@@ -226,7 +230,9 @@ test("loading record with embedded hasMany attribute should not make it dirty", 
   });
 
   Post.adapter = Ember.FixtureAdapter.create();
-  var post = Post.create();
+
+  var owner = buildOwner();
+  var post = Post.create(owner.ownerInjection());
 
   ok(!post.get('comments.isDirty'), "Post comments should be clean initially");
 
@@ -245,7 +251,8 @@ test("isDirty is observable", function() {
     name: attr()
   });
 
-  var obj = Model.create();
+  var owner = buildOwner();
+  var obj = Model.create(owner.ownerInjection());
   Ember.run(function() {
     obj.load(1, {name: 'Erik'});
   });
@@ -359,8 +366,9 @@ test("modifying hasMany record should make parent dirty", function() {
   Post.adapter = Ember.FixtureAdapter.create();
   Author.adapter = Ember.FixtureAdapter.create();
 
-  var author = Author.create();
-  var post = Post.create();
+  var owner = buildOwner();
+  var author = Author.create(owner.ownerInjection());
+  var post = Post.create(owner.ownerInjection());
 
   Ember.run(function() {
     post.load(1, {id: 1, author_ids: [100]});
@@ -386,8 +394,9 @@ test("changing back record in hasMany array should make parent clean again", fun
   Post.adapter = Ember.FixtureAdapter.create();
   Author.adapter = Ember.FixtureAdapter.create();
 
-  var author = Author.create();
-  var post = Post.create();
+  var owner = buildOwner();
+  var author = Author.create(owner.ownerInjection());
+  var post = Post.create(owner.ownerInjection());
 
   Ember.run(function() {
     post.load(1, {id: 1, author_ids: [100]});
@@ -519,7 +528,8 @@ test("modifying embedded belongsTo should make parent dirty", function() {
 
   Post.adapter = Ember.FixtureAdapter.create();
 
-  var post = Post.create();
+  var owner = buildOwner();
+  var post = Post.create(owner.ownerInjection());
   Ember.run(post, post.load, json.id, json);
   equal(post.get('isDirty'), false, 'post should be clean initially');
 
@@ -547,7 +557,8 @@ test("changing back embedded belongsTo should make parent clean again", function
 
   Post.adapter = Ember.FixtureAdapter.create();
 
-  var post = Post.create();
+  var owner = buildOwner();
+  var post = Post.create(owner.ownerInjection());
   Ember.run(post, post.load, json.id, json);
 
   var author = post.get('author');
@@ -741,7 +752,8 @@ test("set embedded belongsTo cleans up observers", function() {
     return Ember.meta(obj)._watching['isDirty'] || 0;
   }
 
-  var post = Post.create();
+  var owner = buildOwner();
+  var post = Post.create(owner.ownerInjection());
   Ember.run(post, post.load, json.id, json);
 
   var author = post.get('author');

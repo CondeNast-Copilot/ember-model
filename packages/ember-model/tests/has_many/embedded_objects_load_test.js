@@ -28,7 +28,7 @@ test("derp", function() {
   Ember.setOwner(Comment, owner);
   Ember.setOwner(Article, owner);
 
-  var article = Article.create();
+  var article = Article.create(owner.ownerInjection());
   Ember.run(article, article.load, json.id, json);
 
   var comments = article.get('comments');

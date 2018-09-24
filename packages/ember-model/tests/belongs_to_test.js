@@ -26,7 +26,8 @@ test("using it in a model definition", function() {
 
   Article.primaryKey = 'slug';
 
-  var comment = Comment.create();
+  var owner = buildOwner();
+  var comment = Comment.create(owner.ownerInjection());
   Ember.run(comment, comment.load, 1, { article: { slug: 'first-article' } });
   var article = Ember.run(comment, comment.get, 'article');
 
@@ -266,8 +267,10 @@ test("embedded belongsTo CP should handle set", function() {
   Post.adapter = Ember.FixtureAdapter.create();
   Author.adapter = Ember.FixtureAdapter.create();
 
-  var post = Post.create(),
-      author = Author.create();
+  var owner = buildOwner();
+
+  var post = Post.create(owner.ownerInjection()),
+      author = Author.create(owner.ownerInjection());
 
   Ember.run(function() {
     author.load(100, {id: 100});
@@ -296,8 +299,9 @@ test("must be set with value of same type", function() {
   Post.adapter = Ember.FixtureAdapter.create();
   Author.adapter = Ember.FixtureAdapter.create();
 
-  var post = Post.create(),
-      postTwo = Post.create();
+  var owner = buildOwner();
+  var post = Post.create(owner.ownerInjection()),
+      postTwo = Post.create(owner.ownerInjection());
 
   Ember.run(function() {
     post.load(1, {id: 1, author_id: null});
@@ -324,8 +328,9 @@ test("relationship type cannot be empty", function() {
   Post.adapter = Ember.FixtureAdapter.create();
   Author.adapter = Ember.FixtureAdapter.create();
 
-  var post = Post.create(),
-    author = Author.create();
+  var owner = buildOwner();
+  var post = Post.create(owner.ownerInjection()),
+    author = Author.create(owner.ownerInjection());
   Ember.run(function() {
     post.load(1, {id: 1, author_id: author});
   });
@@ -375,8 +380,9 @@ test("should be able to set nonembedded relationship to undefined", function() {
   Post.adapter = Ember.FixtureAdapter.create();
   Author.adapter = Ember.FixtureAdapter.create();
 
-  var post = Post.create(),
-      author = Post.create();
+  var owner = buildOwner();
+  var post = Post.create(owner.ownerInjection()),
+      author = Post.create(owner.ownerInjection());
 
   Ember.run(function() {
     post.load(1, {id: 1, author_id: 100});
@@ -427,8 +433,9 @@ test("setting relationship should make parent dirty", function() {
   Post.adapter = Ember.FixtureAdapter.create();
   Author.adapter = Ember.FixtureAdapter.create();
 
-  var post = Post.create(),
-      author = Author.create();
+  var owner = buildOwner();
+  var post = Post.create(owner.ownerInjection()),
+      author = Author.create(owner.ownerInjection());
 
   Ember.run(function() {
     author.load(100, {id: 100, name: 'bob'});
@@ -457,9 +464,10 @@ test("setting existing nonembedded relationship should make parent dirty", funct
   Post.adapter = Ember.FixtureAdapter.create();
   Author.adapter = Ember.FixtureAdapter.create();
 
-  var post = Post.create(),
-      author = Author.create(),
-      secondAuthor = Author.create();
+  var owner = buildOwner();
+  var post = Post.create(owner.ownerInjection()),
+      author = Author.create(owner.ownerInjection()),
+      secondAuthor = Author.create(owner.ownerInjection());
 
   Ember.run(function() {
     author.load(100, {id: 100, name: 'bob'});
@@ -489,9 +497,10 @@ test("setting existing nonembedded relationship to NULL should make parent dirty
   Post.adapter = Ember.FixtureAdapter.create();
   Author.adapter = Ember.FixtureAdapter.create();
 
-  var post = Post.create(),
-      author = Author.create(),
-      secondAuthor = Author.create();
+  var owner = buildOwner();
+  var post = Post.create(owner.ownerInjection()),
+      author = Author.create(owner.ownerInjection()),
+      secondAuthor = Author.create(owner.ownerInjection());
 
   Ember.run(function() {
     author.load(100, {id: 100, name: 'bob'});
@@ -762,7 +771,8 @@ test("embedded belongsTo with undefined value", function() {
 
   Post.adapter = Ember.FixtureAdapter.create();
 
-  var post = Post.create();
+  var owner = buildOwner();
+  var post = Post.create(owner.ownerInjection());
   Ember.run(post, post.load, json.id, json);
   equal(post.get('author'), null);
 });
