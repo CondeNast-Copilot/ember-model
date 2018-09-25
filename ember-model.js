@@ -760,7 +760,7 @@ Ember.Model = Ember.Object.extend(Ember.Evented, {
     recursionDepth = recursionDepth || 0;
     var rootKey = get(this.constructor, 'rootKey');
 
-    if (recursionDepth < 10) {
+    if (recursionDepth < 3) {
       // Using ES5 getters feature here `this[key]` instead of
       // this.get(key)
       for (let [key, meta] of this.constructor.attributes) {
