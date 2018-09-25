@@ -171,7 +171,7 @@ Ember.Model = Ember.Object.extend(Ember.Evented, {
     if (meta.isAnything) {
       return content;
     }
-    content.trimEmptyRecords();
+    content.trimEmptyRecords(recursionDepth);
     return content.toJSON(recursionDepth);
   },
 

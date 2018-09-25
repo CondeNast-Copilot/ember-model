@@ -174,11 +174,11 @@ Ember.ManyArray = Ember.RecordArray.extend({
     });
   },
 
-  trimEmptyRecords: function() {
+  trimEmptyRecords: function(recursionDepth) {
     var emptyObjects = [];
     for (var i = 0; i < this.get('length'); i++) {
       var record = this.objectAt(i);
-      if (this.isEmpty(record.toJSON())) {
+      if (this.isEmpty(record.toJSON(recursionDepth))) {
         emptyObjects.pushObject(record);
       }
     }
@@ -272,9 +272,9 @@ Ember.EmbeddedHasManyArray = Ember.ManyArray.extend({
     return record;
   },
 
-  toJSON: function() {
+  toJSON: function(recursionDepth) {
     return this.map(function(record) {
-      return record.toJSON();
+      return record.toJSON(recursionDepth);
     });
   }
 });
