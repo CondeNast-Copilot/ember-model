@@ -461,11 +461,11 @@ Ember.ManyArray = Ember.RecordArray.extend({
     });
   },
 
-  trimEmptyRecords: function(recursionDepth) {
+  trimEmptyRecords: function() {
     var emptyObjects = [];
     for (var i = 0; i < this.get('length'); i++) {
       var record = this.objectAt(i);
-      if (this.isEmpty(record.toJSON(recursionDepth))) {
+      if (this.isEmpty(record.toJSON())) {
         emptyObjects.pushObject(record);
       }
     }
@@ -559,9 +559,9 @@ Ember.EmbeddedHasManyArray = Ember.ManyArray.extend({
     return record;
   },
 
-  toJSON: function(recursionDepth) {
+  toJSON: function() {
     return this.map(function(record) {
-      return record.toJSON(recursionDepth);
+      return record.toJSON();
     });
   }
 });
@@ -736,56 +736,53 @@ Ember.Model = Ember.Object.extend(Ember.Evented, {
     }
   },
 
-  serializeHasMany: function(key, meta, recursionDepth) {
+  serializeHasMany: function(key, meta) {
     var content = this.get(key);
     if (meta.isAnything) {
       return content;
     }
-    content.trimEmptyRecords(recursionDepth);
-    return content.toJSON(recursionDepth);
+    content.trimEmptyRecords();
+    return content.toJSON();
   },
 
-  serializeBelongsTo: function(key, meta, recursionDepth) {
+  serializeBelongsTo: function(key, meta) {
     if (meta.options.embedded) {
       var record = this.get(key);
-      return record ? record.toJSON(recursionDepth) : null;
+      return record ? record.toJSON() : null;
     } else {
       var primaryKey = get(meta.getType(this, meta.type), 'primaryKey');
       return this.get(key + '.' + primaryKey);
     }
   },
 
-  toJSON: function(recursionDepth) {
+  toJSON: function() {
     var json = {};
-    recursionDepth = recursionDepth || 0;
     var rootKey = get(this.constructor, 'rootKey');
 
-      // Using ES5 getters feature here `this[key]` instead of
-      // this.get(key)
-      for (let [key, meta] of this.constructor.attributes) {
-        if (meta.type && meta.type.serialize) {
-          json[this.dataKey(key)] = meta.type.serialize(this[key]);
-        } else if (meta.type && Ember.Model.dataTypes[meta.type]) {
-          json[this.dataKey(key)] = Ember.Model.dataTypes[meta.type].serialize(this[key]);
-        } else {
-          json[this.dataKey(key)] = this[key];
-        }
+    // Using ES5 getters feature here `this[key]` instead of
+    // this.get(key)
+    for (let [key, meta] of this.constructor.attributes) {
+      if (meta.type && meta.type.serialize) {
+        json[this.dataKey(key)] = meta.type.serialize(this[key]);
+      } else if (meta.type && Ember.Model.dataTypes[meta.type]) {
+        json[this.dataKey(key)] = Ember.Model.dataTypes[meta.type].serialize(this[key]);
+      } else {
+        json[this.dataKey(key)] = this[key];
+      }
+    }
+
+    for (let [key, meta] of this.constructor.relationships) {
+      let data;
+      let relationshipKey = meta.options.key || key;
+
+      if (meta.kind === 'belongsTo') {
+        data = this.serializeBelongsTo(key, meta);
+      } else {
+        data = this.serializeHasMany(key, meta);
       }
 
-    if (recursionDepth < 3) {
-      for (let [key, meta] of this.constructor.relationships) {
-        let data;
-        let relationshipKey = meta.options.key || key;
+      json[relationshipKey] = data;
 
-        if (meta.kind === 'belongsTo') {
-          data = this.serializeBelongsTo(key, meta, recursionDepth + 1);
-        } else {
-          data = this.serializeHasMany(key, meta, recursionDepth + 1);
-        }
-
-        json[relationshipKey] = data;
-
-      }
     }
 
     if (rootKey) {

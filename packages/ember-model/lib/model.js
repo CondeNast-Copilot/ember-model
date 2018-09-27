@@ -190,19 +190,19 @@ Ember.Model = Ember.Object.extend(Ember.Evented, {
     recursionDepth = recursionDepth || 0;
     var rootKey = get(this.constructor, 'rootKey');
 
-      // Using ES5 getters feature here `this[key]` instead of
-      // this.get(key)
-      for (let [key, meta] of this.constructor.attributes) {
-        if (meta.type && meta.type.serialize) {
-          json[this.dataKey(key)] = meta.type.serialize(this[key]);
-        } else if (meta.type && Ember.Model.dataTypes[meta.type]) {
-          json[this.dataKey(key)] = Ember.Model.dataTypes[meta.type].serialize(this[key]);
-        } else {
-          json[this.dataKey(key)] = this[key];
-        }
+    // Using ES5 getters feature here `this[key]` instead of
+    // this.get(key)
+    for (let [key, meta] of this.constructor.attributes) {
+      if (meta.type && meta.type.serialize) {
+        json[this.dataKey(key)] = meta.type.serialize(this[key]);
+      } else if (meta.type && Ember.Model.dataTypes[meta.type]) {
+        json[this.dataKey(key)] = Ember.Model.dataTypes[meta.type].serialize(this[key]);
+      } else {
+        json[this.dataKey(key)] = this[key];
       }
+    }
 
-    if (recursionDepth < 3) {
+    if (recursionDepth < 5) {
       for (let [key, meta] of this.constructor.relationships) {
         let data;
         let relationshipKey = meta.options.key || key;
@@ -214,7 +214,6 @@ Ember.Model = Ember.Object.extend(Ember.Evented, {
         }
 
         json[relationshipKey] = data;
-
       }
     }
 
