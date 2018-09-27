@@ -24,6 +24,7 @@ test("derp", function() {
     comments: Ember.hasMany(Comment, { key: 'comments', embedded: true })
   });
 
+
   var owner = buildOwner();
   Ember.setOwner(Comment, owner);
   Ember.setOwner(Article, owner);
@@ -37,6 +38,48 @@ test("derp", function() {
   ok(Ember.run(comments, comments.get, 'firstObject') instanceof Comment);
   deepEqual(Ember.run(comments, comments.mapBy, 'text'), ['uno', 'dos', 'tres']);
   ok(!comments.isEvery('isNew'), "Records should not be new");
+});
+
+test("can load content with cyclical relationships", function() {
+  var articleOneFixture = {
+    id: 1,
+    hed : 'Article one fixture'
+  };
+
+  var articleTwoFixture = {
+    id: 2,
+    hed : 'Article two fixture'
+  };
+
+  var Article = Ember.Model.extend({
+    id: attr(),
+    hed: attr(),
+    relatedItems: Ember.hasMany('article', { embedded: true })
+  });
+
+  var owner = buildOwner();
+  Ember.setOwner(Article, owner);
+  owner.register('model:article', Article);
+  owner.register('service:store', Ember.Model.Store);
+
+  var articleOne = Article.create(owner.ownerInjection());
+  var articleTwo = Article.create(owner.ownerInjection());
+  articleOne.load(articleOneFixture.id, articleOneFixture);
+  articleTwo.load(articleTwoFixture.id, articleTwoFixture);
+
+  //relate article one and article two to each other to form a loop
+  articleOne.relatedItems.pushObject(articleTwo);
+  articleTwo.relatedItems.pushObject(articleOne);
+
+  var articleOneJSON = articleOne.toJSON();
+
+  ok(articleOneJSON);
+  equal(articleOneJSON.hed, 'Article one fixture');
+  equal(articleOneJSON.relatedItems.length, 1);
+
+  var articleTwoRel = articleOneJSON.relatedItems[0];
+  equal(articleTwoRel.hed, 'Article two fixture');
+  equal(articleTwoRel.relatedItems.length, 1);
 });
 
 test("loading embedded data into a parent updates the child records", function() {
