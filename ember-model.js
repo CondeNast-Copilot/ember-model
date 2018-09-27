@@ -461,11 +461,11 @@ Ember.ManyArray = Ember.RecordArray.extend({
     });
   },
 
-  trimEmptyRecords: function() {
+  trimEmptyRecords: function(recursionDepth) {
     var emptyObjects = [];
     for (var i = 0; i < this.get('length'); i++) {
       var record = this.objectAt(i);
-      if (this.isEmpty(record.toJSON())) {
+      if (this.isEmpty(record.toJSON(recursionDepth, true))) {
         emptyObjects.pushObject(record);
       }
     }
@@ -559,9 +559,9 @@ Ember.EmbeddedHasManyArray = Ember.ManyArray.extend({
     return record;
   },
 
-  toJSON: function() {
+  toJSON: function(recursionDepth) {
     return this.map(function(record) {
-      return record.toJSON();
+      return record.toJSON(recursionDepth);
     });
   }
 });
@@ -736,27 +736,28 @@ Ember.Model = Ember.Object.extend(Ember.Evented, {
     }
   },
 
-  serializeHasMany: function(key, meta) {
+  serializeHasMany: function(key, meta, recursionDepth) {
     var content = this.get(key);
     if (meta.isAnything) {
       return content;
     }
-    content.trimEmptyRecords();
-    return content.toJSON();
+    content.trimEmptyRecords(recursionDepth);
+    return content.toJSON(recursionDepth);
   },
 
-  serializeBelongsTo: function(key, meta) {
+  serializeBelongsTo: function(key, meta, recursionDepth) {
     if (meta.options.embedded) {
       var record = this.get(key);
-      return record ? record.toJSON() : null;
+      return record ? record.toJSON(recursionDepth) : null;
     } else {
       var primaryKey = get(meta.getType(this, meta.type), 'primaryKey');
       return this.get(key + '.' + primaryKey);
     }
   },
 
-  toJSON: function() {
+  toJSON: function(recursionDepth) {
     var json = {};
+    recursionDepth = recursionDepth || 0;
     var rootKey = get(this.constructor, 'rootKey');
 
     // Using ES5 getters feature here `this[key]` instead of
@@ -771,18 +772,19 @@ Ember.Model = Ember.Object.extend(Ember.Evented, {
       }
     }
 
-    for (let [key, meta] of this.constructor.relationships) {
-      let data;
-      let relationshipKey = meta.options.key || key;
+    if (recursionDepth < 5) {
+      for (let [key, meta] of this.constructor.relationships) {
+        let data;
+        let relationshipKey = meta.options.key || key;
 
-      if (meta.kind === 'belongsTo') {
-        data = this.serializeBelongsTo(key, meta);
-      } else {
-        data = this.serializeHasMany(key, meta);
+        if (meta.kind === 'belongsTo') {
+          data = this.serializeBelongsTo(key, meta, recursionDepth + 1);
+        } else {
+          data = this.serializeHasMany(key, meta, recursionDepth + 1);
+        }
+
+        json[relationshipKey] = data;
       }
-
-      json[relationshipKey] = data;
-
     }
 
     if (rootKey) {
