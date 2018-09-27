@@ -203,14 +203,15 @@ Ember.Model = Ember.Object.extend(Ember.Evented, {
     }
 
     if (recursionDepth < 5) {
+      recursionDepth++;
       for (let [key, meta] of this.constructor.relationships) {
         let data;
         let relationshipKey = meta.options.key || key;
 
         if (meta.kind === 'belongsTo') {
-          data = this.serializeBelongsTo(key, meta, recursionDepth + 1);
+          data = this.serializeBelongsTo(key, meta, recursionDepth);
         } else {
-          data = this.serializeHasMany(key, meta, recursionDepth + 1);
+          data = this.serializeHasMany(key, meta, recursionDepth);
         }
 
         json[relationshipKey] = data;
