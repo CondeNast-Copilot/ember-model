@@ -24,7 +24,6 @@ test("derp", function() {
     comments: Ember.hasMany(Comment, { key: 'comments', embedded: true })
   });
 
-
   var owner = buildOwner();
   Ember.setOwner(Comment, owner);
   Ember.setOwner(Article, owner);
