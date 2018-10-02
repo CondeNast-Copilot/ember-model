@@ -772,7 +772,7 @@ Ember.Model = Ember.Object.extend(Ember.Evented, {
       }
     }
 
-    if (recursionDepth < 100) {
+    if (recursionDepth < 5) {
       recursionDepth++;
       for (let [key, meta] of this.constructor.relationships) {
         let data;
