@@ -185,6 +185,8 @@ Ember.Model = Ember.Object.extend(Ember.Evented, {
     }
   },
 
+  // toJSON accepts the property name as its first argument when called
+  // from functions like JSON.stringify.
   toJSON: function(_, recursionDepth) {
     var json = {};
     recursionDepth = recursionDepth || 0;

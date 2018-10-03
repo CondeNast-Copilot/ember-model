@@ -272,6 +272,8 @@ Ember.EmbeddedHasManyArray = Ember.ManyArray.extend({
     return record;
   },
 
+  // toJSON accepts the property name as its first argument when called
+  // from functions like JSON.stringify.
   toJSON: function(_, recursionDepth) {
     return this.map(function(record, index) {
       return record.toJSON(String(index), recursionDepth);
